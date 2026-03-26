@@ -28,6 +28,7 @@ input{padding:10px;border-radius:10px;border:none;margin:5px}
 <h2>👥 Jogadores</h2>
 <ul id="lista"></ul>
 <p id="statusSala">Aguardando...</p>
+<button onclick="ficarPronto()">Estou pronto ✅</button>
 </div>
 
 <div id="jogo" style="display:none">
@@ -44,7 +45,13 @@ const firebaseConfig = {
   authDomain: "truco-online-eaab3.firebaseapp.com",
   projectId: "truco-online-eaab3",
 };
+async function ficarPronto(){
+  const ref=db.collection("salas").doc(salaId);
 
+  await ref.update({
+    [`prontos.${jogadorId}`]: true
+  });
+}
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -52,6 +59,7 @@ let salaId="";
 let jogadorId=Math.random().toString(36).substring(2);
 let nome="";
 let mao=[];
+
 
 const baralho=["4♠","5♠","6♠","7♠","Q♠","J♠","K♠","A♠","2♠","3♠",
 "4♥","5♥","6♥","7♥","Q♥","J♥","K♥","A♥","2♥","3♥",
@@ -93,9 +101,20 @@ async function entrar(){
     });
   }
 
-  await entrarJogador();
-  ouvirSala();
-}
+await ref.set({
+  players:{},
+  hands:{},
+  mesa:[],
+  turno:0,
+  pontos:{A:0,B:0},
+  truco:1,
+  rodada:1,
+  rodadasVencidas:{A:0,B:0},
+  vira:null,
+  manilha:null,
+  gameStarted:false, // 🔥 AQUI
+  prontos:{}         // 🔥 NOVO
+});
 
 async function entrarJogador(){
   const ref=db.collection("salas").doc(salaId);
@@ -128,21 +147,36 @@ async function entrarJogador(){
 function ouvirSala(){
   const ref=db.collection("salas").doc(salaId);
 
-  ref.onSnapshot(doc=>{
+  ref.onSnapshot(async doc=>{
     const d=doc.data();
+
     const lista=document.getElementById("lista");
     lista.innerHTML="";
 
-    const jogadores=Object.values(d.players||{});
+    const jogadores=Object.entries(d.players||{});
+    const prontos=d.prontos||{};
 
-    jogadores.forEach(j=>{
+    jogadores.forEach(([id,j])=>{
       const li=document.createElement("li");
-      li.innerText=j.nome;
+
+      const pronto = prontos[id] ? "✅" : "❌";
+
+      li.innerText = j.nome + " " + pronto;
       lista.appendChild(li);
     });
 
-    if(jogadores.length>=2){
-      document.getElementById("statusSala").innerText="Iniciando...";
+    const total=jogadores.length;
+    const totalProntos=Object.keys(prontos).length;
+
+    document.getElementById("statusSala").innerText =
+      `${totalProntos}/${total} prontos`;
+
+    // 🔥 INICIAR JOGO
+    if(total>=2 && total===totalProntos && !d.gameStarted){
+      await ref.update({gameStarted:true});
+    }
+
+    if(d.gameStarted){
       iniciarJogo();
     }
   });
