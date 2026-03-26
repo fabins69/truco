@@ -46,12 +46,20 @@ const firebaseConfig = {
   projectId: "truco-online-eaab3",
 };
 async function ficarPronto(){
-  const ref=db.collection("salas").doc(salaId);
+  const ref = db.collection("salas").doc(salaId);
 
-  await ref.update({
-    [`prontos.${jogadorId}`]: true
+  await db.runTransaction(async t => {
+    const doc = await t.get(ref);
+    let d = doc.data();
+
+    if(!d.prontos) d.prontos = {}; // 🔥 garante existência
+
+    d.prontos[jogadorId] = true;
+
+    t.update(ref, { prontos: d.prontos });
   });
 }
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
