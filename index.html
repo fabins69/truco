@@ -20,6 +20,10 @@ input{padding:10px;border-radius:10px;border:none;margin:5px}
 
 <input id="nome" placeholder="Seu nome">
 <input id="sala" placeholder="Código da sala">
+<select id="modo">
+  <option value="1x1">1x1</option>
+  <option value="2x2">2x2</option>
+</select>
 <button onclick="entrar()">Entrar</button>
 
 <div id="espera" style="display:none">
@@ -59,8 +63,15 @@ async function entrar(){
   const doc=await ref.get();
 
   if(!doc.exists){
+    const modo=document.getElementById("modo").value;
     await ref.set({
       players:{},
+      prontos:{},
+      gameStarted:false,
+      modo:modo,
+      limiteJogadores: modo === "1x1" ? 2 : 4
+    });
+  },
       prontos:{},
       gameStarted:false
     });
@@ -71,6 +82,15 @@ async function entrar(){
     let d=snap.data();
 
     if(!d.players) d.players={};
+    if(!d.prontos) d.prontos={};
+    if(!d.modo) d.modo="1x1";
+    if(!d.limiteJogadores) d.limiteJogadores = d.modo === "1x1" ? 2 : 4;
+
+    const totalJogadores = Object.keys(d.players).length;
+    if(!d.players[jogadorId] && totalJogadores >= d.limiteJogadores){
+      throw new Error("Sala cheia para o modo escolhido.");
+    }
+
     d.players[jogadorId]={nome};
 
     t.set(ref,d);
@@ -99,12 +119,14 @@ function ouvirSala(){
 
   ref.onSnapshot(async doc=>{
     const d=doc.data();
+    if(!d) return;
 
     const lista=document.getElementById("lista");
     lista.innerHTML="";
 
     const jogadores=Object.entries(d.players||{});
     const prontos=d.prontos||{};
+    const limite=d.limiteJogadores || 2;
 
     jogadores.forEach(([id,j])=>{
       const li=document.createElement("li");
@@ -116,14 +138,14 @@ function ouvirSala(){
     const total=jogadores.length;
     const prontosCount=Object.keys(prontos).length;
 
-    document.getElementById("status").innerText=`${prontosCount}/${total} prontos`;
+    document.getElementById("status").innerText=`Modo: ${d.modo || "1x1"} | ${prontosCount}/${total} prontos | aguardando ${limite} jogador(es)`;
 
-    if(total>=2 && prontosCount===total && !d.gameStarted){
+    if(total===limite && prontosCount===total && !d.gameStarted){
       await ref.update({gameStarted:true});
     }
 
     if(d.gameStarted){
-      document.getElementById("status").innerText="JOGO INICIADO!";
+      document.getElementById("status").innerText=`JOGO INICIADO! Modo ${d.modo}`;
     }
   });
 }
