@@ -135,10 +135,11 @@
     let nome = "";
     let salaListener = null;
 
-    let jogadorId = localStorage.getItem("truco_jogador_id");
+    let jogadorId = sessionStorage.getItem("truco_jogador_id");
     if (!jogadorId) {
       jogadorId = Math.random().toString(36).substring(2, 10);
-      localStorage.setItem("truco_jogador_id", jogadorId);
+      sessionStorage.setItem("truco_jogador_id", jogadorId);
+    }
     }
 
     async function entrar() {
