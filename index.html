@@ -50,7 +50,7 @@
     .secondary { background: #546e7a; }
     .danger { background: #e53935; }
     .box {
-      max-width: 760px;
+      max-width: 840px;
       margin: 20px auto;
       background: rgba(255,255,255,0.06);
       border-radius: 16px;
@@ -69,13 +69,28 @@
     .error { color: #ff8a8a; font-weight: bold; }
     #debug { white-space: pre-wrap; font-size: 14px; opacity: 0.9; }
     .mesa-area { margin-top: 12px; }
-    .placar { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+    .placar {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
     .mesa-cartas, .mao-cartas, .linha-botoes {
       display: flex;
       justify-content: center;
       gap: 12px;
       flex-wrap: wrap;
       margin-top: 12px;
+    }
+    .carta-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .carta-nome {
+      font-size: 14px;
+      opacity: 0.9;
     }
     .carta {
       width: 90px;
@@ -130,7 +145,7 @@
     </div>
 
     <div id="jogo" class="box" style="display:none">
-      <div class="placar" id="placar">0 x 0</div>
+      <div class="placar" id="placar">Placar</div>
       <div class="subtitulo" id="turnoInfo">Turno:</div>
       <div class="subtitulo" id="rodadaInfo">Rodada: 1</div>
       <div class="subtitulo" id="trucoInfo">Mão valendo: 1</div>
@@ -258,15 +273,18 @@
       return 12;
     }
 
-    function podePedirAumento(data) {
-      const ultimoValor = data.trucoValor || 1;
-      const ultimoAceitou = data.trucoAceitoPor || "";
-      const ultimoPediu = data.trucoPedidoPorUltimo || "";
+    function nomeDoTime(players, time) {
+      const ids = idsOrdenados(players);
+      const nomes = ids
+        .filter((id, idx) => (idx % 2 === 0 ? "A" : "B") === time)
+        .map(id => players[id]?.nome || "Jogador");
+      return nomes.join(" / ") || `Time ${time}`;
+    }
 
-      if (ultimoValor === 1) return true;
-      if (!ultimoAceitou) return false;
-
-      return jogadorId === ultimoAceitou && jogadorId !== ultimoPediu;
+    function placarComNomes(players, pontos) {
+      const nomeA = nomeDoTime(players, "A");
+      const nomeB = nomeDoTime(players, "B");
+      return `${nomeA}: ${pontos?.A || 0} × ${pontos?.B || 0} :${nomeB}`;
     }
 
     async function entrar() {
@@ -297,15 +315,12 @@
             turno: 0,
             pontos: { A: 0, B: 0 },
             trucoValor: 1,
-            trucoPedidoPorUltimo: "",
-            trucoAceitoPor: "",
             rodada: 1,
             rodadaAtualVitorias: { A: 0, B: 0 },
             vira: "",
             manilha: "",
             trucoPendente: false,
             trucoPedidoPor: "",
-            trucoProposto: null,
             ultimoVencedor: ""
           });
         }
@@ -324,15 +339,11 @@
           if (data.turno === undefined) data.turno = 0;
           if (!data.rodadaAtualVitorias) data.rodadaAtualVitorias = { A: 0, B: 0 };
           if (!data.trucoValor) data.trucoValor = 1;
-          if (!data.trucoPedidoPorUltimo) data.trucoPedidoPorUltimo = "";
-          if (!data.trucoAceitoPor) data.trucoAceitoPor = "";
           if (!data.rodada) data.rodada = 1;
           if (!data.vira) data.vira = "";
           if (!data.manilha) data.manilha = "";
           if (data.trucoPendente === undefined) data.trucoPendente = false;
           if (!data.trucoPedidoPor) data.trucoPedidoPor = "";
-          if (data.trucoProposto === undefined) data.trucoProposto = null;
-          if (!data.ultimoVencedor) data.ultimoVencedor = "";
 
           const totalJogadores = Object.keys(data.players).length;
           const jaEstaNaSala = !!data.players[jogadorId];
@@ -405,16 +416,13 @@
             turno: 0,
             pontos: d.pontos || { A: 0, B: 0 },
             trucoValor: 1,
-            trucoPedidoPorUltimo: "",
-            trucoAceitoPor: "",
             rodada: 1,
             rodadaAtualVitorias: { A: 0, B: 0 },
             ultimoVencedor: "",
             vira,
             manilha,
             trucoPendente: false,
-            trucoPedidoPor: "",
-            trucoProposto: null
+            trucoPedidoPor: ""
           });
         });
       }
@@ -437,25 +445,20 @@
       data.mesa = [];
       data.turno = 0;
       data.trucoValor = 1;
-      data.trucoPedidoPorUltimo = "";
-      data.trucoAceitoPor = "";
       data.rodada = 1;
       data.rodadaAtualVitorias = { A: 0, B: 0 };
       data.vira = vira;
       data.manilha = manilha;
       data.trucoPendente = false;
       data.trucoPedidoPor = "";
-      data.trucoProposto = null;
-
       if (vencedorTime) {
-        data.ultimoVencedor = `Time ${vencedorTime} venceu a mão`;
+        data.ultimoVencedor = `${nomeDoTime(players, vencedorTime)} venceu a mão`;
       }
     }
 
     async function jogarCarta(carta) {
       try {
         const ref = db.collection("salas").doc(salaId);
-
         await db.runTransaction(async (t) => {
           const doc = await t.get(ref);
           const data = doc.data() || {};
@@ -485,13 +488,9 @@
             }
 
             const time = timeDoJogador(players, vencedora.jogador);
-
-            if (!data.rodadaAtualVitorias) {
-              data.rodadaAtualVitorias = { A: 0, B: 0 };
-            }
-
+            if (!data.rodadaAtualVitorias) data.rodadaAtualVitorias = { A: 0, B: 0 };
             data.rodadaAtualVitorias[time] += 1;
-            data.ultimoVencedor = `${players[vencedora.jogador]?.nome || "Jogador"} venceu a rodada`;
+            data.ultimoVencedor = `${players[vencedora.jogador]?.nome || 'Jogador'} venceu a rodada`;
             data.mesa = [];
             data.rodada = (data.rodada || 1) + 1;
             data.turno = ids.indexOf(vencedora.jogador);
@@ -499,7 +498,6 @@
             if (data.rodadaAtualVitorias[time] >= 2 || data.rodada > 3) {
               if (!data.pontos) data.pontos = { A: 0, B: 0 };
               data.pontos[time] = Math.min(12, (data.pontos[time] || 0) + (data.trucoValor || 1));
-              data.ultimoVencedor = `${players[vencedora.jogador]?.nome || "Jogador"} fez a rodada decisiva. Time ${time} ganhou a mão.`;
               prepararNovaMao(data, time);
             }
           }
@@ -514,7 +512,6 @@
     async function pedirTruco() {
       try {
         const ref = db.collection("salas").doc(salaId);
-
         await db.runTransaction(async (t) => {
           const doc = await t.get(ref);
           const data = doc.data() || {};
@@ -525,13 +522,12 @@
           if (data.trucoPendente) throw new Error("Já existe um truco pendente.");
           if (ids[data.turno] !== jogadorId) throw new Error("Só quem está na vez pode pedir.");
           if ((data.trucoValor || 1) >= 12) throw new Error("A mão já está valendo 12.");
-          if (!podePedirAumento(data)) throw new Error("Agora só quem aceitou a última aposta pode aumentar.");
 
           const proximo = proximoValorTruco(data.trucoValor || 1);
           data.trucoPendente = true;
           data.trucoPedidoPor = jogadorId;
           data.trucoProposto = proximo;
-          data.ultimoVencedor = `${players[jogadorId]?.nome || "Jogador"} pediu ${proximo === 3 ? "TRUCO" : proximo}`;
+          data.ultimoVencedor = `${players[jogadorId]?.nome || 'Jogador'} pediu ${proximo === 3 ? 'TRUCO' : proximo}`;
 
           t.set(ref, data);
         });
@@ -543,7 +539,6 @@
     async function aceitarTruco() {
       try {
         const ref = db.collection("salas").doc(salaId);
-
         await db.runTransaction(async (t) => {
           const doc = await t.get(ref);
           const data = doc.data() || {};
@@ -553,12 +548,10 @@
           if (data.trucoPedidoPor === jogadorId) throw new Error("Quem pediu não pode aceitar.");
 
           data.trucoValor = data.trucoProposto || data.trucoValor || 1;
-          data.trucoAceitoPor = jogadorId;
-          data.trucoPedidoPorUltimo = data.trucoPedidoPor || "";
           data.trucoPendente = false;
           data.trucoPedidoPor = "";
           data.trucoProposto = null;
-          data.ultimoVencedor = `${players[jogadorId]?.nome || "Jogador"} aceitou. A mão agora vale ${data.trucoValor}.`;
+          data.ultimoVencedor = `${players[jogadorId]?.nome || 'Jogador'} aceitou.`;
 
           t.set(ref, data);
         });
@@ -570,7 +563,6 @@
     async function correrTruco() {
       try {
         const ref = db.collection("salas").doc(salaId);
-
         await db.runTransaction(async (t) => {
           const doc = await t.get(ref);
           const data = doc.data() || {};
@@ -580,10 +572,9 @@
           if (data.trucoPedidoPor === jogadorId) throw new Error("Quem pediu não pode correr.");
 
           const timePediu = timeDoJogador(players, data.trucoPedidoPor);
-
           if (!data.pontos) data.pontos = { A: 0, B: 0 };
           data.pontos[timePediu] = Math.min(12, (data.pontos[timePediu] || 0) + (data.trucoValor || 1));
-          data.ultimoVencedor = `${players[jogadorId]?.nome || "Jogador"} correu. Time ${timePediu} ganhou a mão e pontuou.`;
+          data.ultimoVencedor = `${players[jogadorId]?.nome || 'Jogador'} correu. ${nomeDoTime(players, timePediu)} pontuou.`;
 
           prepararNovaMao(data, timePediu);
           t.set(ref, data);
@@ -603,7 +594,7 @@
       const minhaVez = ids[data.turno] === jogadorId;
       const pedidoPorOutro = data.trucoPendente && data.trucoPedidoPor !== jogadorId;
 
-      document.getElementById("placar").textContent = `${data.pontos?.A || 0} x ${data.pontos?.B || 0}`;
+      document.getElementById("placar").textContent = placarComNomes(players, data.pontos);
       document.getElementById("turnoInfo").textContent = minhaVez
         ? `É sua vez • Seu time: ${meuTime}`
         : `Vez de ${nomeTurno} • Seu time: ${meuTime}`;
@@ -611,7 +602,7 @@
       document.getElementById("trucoInfo").textContent = `Mão valendo: ${data.trucoValor || 1}`;
       document.getElementById("statusJogo").textContent = data.ultimoVencedor || "Jogo em andamento";
       document.getElementById("viraCarta").textContent = data.vira || "?";
-      document.getElementById("manilhaInfo").textContent = `Manilha: ${data.manilha || "-"}`;
+      document.getElementById("manilhaInfo").textContent = `Manilha: ${data.manilha || '-'}`;
 
       const mesaDiv = document.getElementById("mesaCartas");
       mesaDiv.innerHTML = "";
@@ -619,10 +610,20 @@
         mesaDiv.innerHTML = "<p>Nenhuma carta na mesa.</p>";
       } else {
         mesa.forEach(item => {
+          const wrap = document.createElement("div");
+          wrap.className = "carta-wrap";
+
+          const nomeJogador = document.createElement("div");
+          nomeJogador.className = "carta-nome";
+          nomeJogador.textContent = players[item.jogador]?.nome || "Jogador";
+
           const carta = document.createElement("div");
           carta.className = "carta usada";
           carta.textContent = item.carta;
-          mesaDiv.appendChild(carta);
+
+          wrap.appendChild(nomeJogador);
+          wrap.appendChild(carta);
+          mesaDiv.appendChild(wrap);
         });
       }
 
@@ -632,13 +633,11 @@
         const carta = document.createElement("div");
         carta.className = "carta";
         carta.textContent = c;
-
         if (data.trucoPendente || !minhaVez) {
           carta.classList.add("usada");
         } else {
           carta.addEventListener("click", () => jogarCarta(c));
         }
-
         maoDiv.appendChild(carta);
       });
 
@@ -646,16 +645,13 @@
       document.getElementById("btnCorrer").style.display = pedidoPorOutro ? "inline-block" : "none";
 
       const btnTruco = document.getElementById("btnTruco");
-      const podeAumentar = podePedirAumento(data);
-
       let nomeBotao = "Pedir Truco";
       if ((data.trucoValor || 1) === 3) nomeBotao = "Pedir 6";
       if ((data.trucoValor || 1) === 6) nomeBotao = "Pedir 9";
       if ((data.trucoValor || 1) === 9) nomeBotao = "Pedir 12";
       if ((data.trucoValor || 1) >= 12) nomeBotao = "Máximo 12";
-
       btnTruco.textContent = nomeBotao;
-      btnTruco.disabled = !!data.trucoPendente || (data.trucoValor || 1) >= 12 || !minhaVez || !podeAumentar;
+      btnTruco.disabled = !!data.trucoPendente || (data.trucoValor || 1) >= 12 || !minhaVez;
     }
 
     function ouvirSala() {
