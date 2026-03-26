@@ -251,6 +251,16 @@
       return 12;
     }
 
+    function podePedirAumento(data) {
+      const ultimoValor = data.trucoValor || 1;
+      const ultimoAceitou = data.trucoAceitoPor || "";
+      const ultimoPediu = data.trucoPedidoPorUltimo || "";
+
+      if (ultimoValor === 1) return true;
+      if (!ultimoAceitou) return false;
+      return jogadorId === ultimoAceitou && jogadorId !== ultimoPediu;
+    }
+
     async function entrar() {
       try {
         mostrarErro("");
@@ -279,7 +289,10 @@
             turno: 0,
             pontos: { A: 0, B: 0 },
             trucoValor: 1,
+            trucoPedidoPorUltimo: "",
+            trucoAceitoPor: "",
             rodada: 1,
+            rodadaAtualVitorias: { A: 0, B: 0 },           rodada: 1,
             rodadaAtualVitorias: { A: 0, B: 0 },
             vira: "",
             manilha: "",
@@ -303,6 +316,8 @@
           if (data.turno === undefined) data.turno = 0;
           if (!data.rodadaAtualVitorias) data.rodadaAtualVitorias = { A: 0, B: 0 };
           if (!data.trucoValor) data.trucoValor = 1;
+          if (!data.trucoPedidoPorUltimo) data.trucoPedidoPorUltimo = "";
+          if (!data.trucoAceitoPor) data.trucoAceitoPor = "";
           if (!data.rodada) data.rodada = 1;
           if (!data.vira) data.vira = "";
           if (!data.manilha) data.manilha = "";
@@ -407,6 +422,8 @@
       data.mesa = [];
       data.turno = 0;
       data.trucoValor = 1;
+      data.trucoPedidoPorUltimo = "";
+      data.trucoAceitoPor = "";
       data.rodada = 1;
       data.rodadaAtualVitorias = { A: 0, B: 0 };
       data.vira = vira;
@@ -459,6 +476,7 @@
             if (data.rodadaAtualVitorias[time] >= 2 || data.rodada > 3) {
               if (!data.pontos) data.pontos = { A: 0, B: 0 };
               data.pontos[time] = Math.min(12, (data.pontos[time] || 0) + (data.trucoValor || 1));
+              data.ultimoVencedor = `${players[vencedora.jogador]?.nome || 'Jogador'} fez a rodada decisiva. Time ${time} ganhou a mão.`;
               await distribuirNovaMao(ref, data, time);
             }
           }
@@ -483,6 +501,7 @@
           if (data.trucoPendente) throw new Error("Já existe um truco pendente.");
           if (ids[data.turno] !== jogadorId) throw new Error("Só quem está no turno pode pedir.");
           if ((data.trucoValor || 1) >= 12) throw new Error("A mão já está valendo 12.");
+          if (!podePedirAumento(data)) throw new Error("Agora só o adversário que aceitou pode aumentar.");
 
           const proximo = proximoValorTruco(data.trucoValor || 1);
           data.trucoPendente = true;
@@ -509,10 +528,12 @@
           if (data.trucoPedidoPor === jogadorId) throw new Error("Quem pediu não pode aceitar.");
 
           data.trucoValor = data.trucoProposto || data.trucoValor || 1;
+          data.trucoAceitoPor = jogadorId;
+          data.trucoPedidoPorUltimo = data.trucoPedidoPor || "";
           data.trucoPendente = false;
           data.trucoPedidoPor = "";
           data.trucoProposto = null;
-          data.ultimoVencedor = `${players[jogadorId]?.nome || 'Jogador'} aceitou.`;
+          data.ultimoVencedor = `${players[jogadorId]?.nome || 'Jogador'} aceitou. A mão agora vale ${data.trucoValor}.`;
 
           t.set(ref, data);
         });
@@ -535,7 +556,7 @@
           const timePediu = timeDoJogador(players, data.trucoPedidoPor);
           if (!data.pontos) data.pontos = { A: 0, B: 0 };
           data.pontos[timePediu] = Math.min(12, (data.pontos[timePediu] || 0) + (data.trucoValor || 1));
-          data.ultimoVencedor = `${players[jogadorId]?.nome || 'Jogador'} correu. Time ${timePediu} pontuou.`;
+          data.ultimoVencedor = `${players[jogadorId]?.nome || 'Jogador'} correu. Time ${timePediu} ganhou a mão e pontuou.`;
 
           await distribuirNovaMao(ref, data, null);
           t.set(ref, data);
