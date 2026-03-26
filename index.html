@@ -1,156 +1,273 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Truco Online</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Truco Online</title>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-<style>
-body{background:#0f2027;color:white;text-align:center;font-family:sans-serif}
-button{padding:10px;border:none;border-radius:10px;background:#ff9800;color:white}
-input{padding:10px;border-radius:10px;border:none;margin:5px}
-</style>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #071a24, #0b2f3d);
+      color: white;
+      text-align: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 30px 16px;
+    }
+
+    h1 {
+      margin-bottom: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    input, select {
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      min-width: 160px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 12px;
+      background: #ff9800;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.92;
+    }
+
+    .box {
+      max-width: 560px;
+      margin: 20px auto;
+      background: rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 16px 0;
+    }
+
+    li {
+      background: rgba(255,255,255,0.08);
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .info {
+      margin-top: 12px;
+      font-size: 16px;
+    }
+
+    .success {
+      color: #6cff8a;
+      font-weight: bold;
+    }
+
+    .warning {
+      color: #ffd166;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>🃏 Truco Online</h1>
 
-<h1>🃏 Truco Online</h1>
+    <div class="topbar">
+      <input id="nome" placeholder="Seu nome">
+      <input id="sala" placeholder="Código da sala">
+      <select id="modo">
+        <option value="1x1">1x1</option>
+        <option value="2x2">2x2</option>
+      </select>
+      <button onclick="entrar()">Entrar</button>
+    </div>
 
-<input id="nome" placeholder="Seu nome">
-<input id="sala" placeholder="Código da sala">
-<select id="modo">
-  <option value="1x1">1x1</option>
-  <option value="2x2">2x2</option>
-</select>
-<button onclick="entrar()">Entrar</button>
+    <div id="espera" class="box" style="display:none">
+      <h2>👥 Sala de espera</h2>
+      <div class="info" id="modoSala"></div>
+      <ul id="lista"></ul>
+      <button onclick="ficarPronto()">Estou pronto ✅</button>
+      <p class="info" id="status">Aguardando jogadores...</p>
+    </div>
+  </div>
 
-<div id="espera" style="display:none">
-<h2>👥 Jogadores</h2>
-<ul id="lista"></ul>
-<button onclick="ficarPronto()">Estou pronto ✅</button>
-<p id="status"></p>
-</div>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD4YnuGHnyAKtQERG1ojY8Nie00dMDoOAc",
+      authDomain: "truco-online-eaab3.firebaseapp.com",
+      projectId: "truco-online-eaab3",
+      storageBucket: "truco-online-eaab3.firebasestorage.app",
+      messagingSenderId: "549011297387",
+      appId: "1:549011297387:web:e6490bc55684742e3dcd2e"
+    };
 
-<script>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-const firebaseConfig = {
-  apiKey: "AIzaSyD4YnuGHnyAKtQERG1ojY8Nie00dMDoOAc",
-  authDomain: "truco-online-eaab3.firebaseapp.com",
-  projectId: "truco-online-eaab3"
-};
+    let salaId = "";
+    let nome = "";
+    let salaListener = null;
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-let salaId="";
-let jogadorId=Math.random().toString(36).substring(2);
-let nome="";
-
-async function entrar(){
-  nome=document.getElementById("nome").value;
-  salaId=document.getElementById("sala").value;
-
-  if(!nome || !salaId){
-    alert("Preencha tudo");
-    return;
-  }
-
-  document.getElementById("espera").style.display="block";
-
-  const ref=db.collection("salas").doc(salaId);
-  const doc=await ref.get();
-
-  if(!doc.exists){
-    const modo=document.getElementById("modo").value;
-    await ref.set({
-      players:{},
-      prontos:{},
-      gameStarted:false,
-      modo:modo,
-      limiteJogadores: modo === "1x1" ? 2 : 4
-    });
-  },
-      prontos:{},
-      gameStarted:false
-    });
-  }
-
-  await db.runTransaction(async t=>{
-    const snap=await t.get(ref);
-    let d=snap.data();
-
-    if(!d.players) d.players={};
-    if(!d.prontos) d.prontos={};
-    if(!d.modo) d.modo="1x1";
-    if(!d.limiteJogadores) d.limiteJogadores = d.modo === "1x1" ? 2 : 4;
-
-    const totalJogadores = Object.keys(d.players).length;
-    if(!d.players[jogadorId] && totalJogadores >= d.limiteJogadores){
-      throw new Error("Sala cheia para o modo escolhido.");
+    let jogadorId = localStorage.getItem("truco_jogador_id");
+    if (!jogadorId) {
+      jogadorId = Math.random().toString(36).substring(2, 10);
+      localStorage.setItem("truco_jogador_id", jogadorId);
     }
 
-    d.players[jogadorId]={nome};
+    async function entrar() {
+      nome = document.getElementById("nome").value.trim();
+      salaId = document.getElementById("sala").value.trim();
+      const modoSelecionado = document.getElementById("modo").value;
 
-    t.set(ref,d);
-  });
+      if (!nome || !salaId) {
+        alert("Preencha nome e código da sala.");
+        return;
+      }
 
-  ouvirSala();
-}
+      const ref = db.collection("salas").doc(salaId);
+      const snap = await ref.get();
 
-async function ficarPronto(){
-  const ref=db.collection("salas").doc(salaId);
+      if (!snap.exists) {
+        await ref.set({
+          players: {},
+          prontos: {},
+          gameStarted: false,
+          modo: modoSelecionado,
+          limiteJogadores: modoSelecionado === "1x1" ? 2 : 4,
+          criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
 
-  await db.runTransaction(async t=>{
-    const snap=await t.get(ref);
-    let d=snap.data();
+      await db.runTransaction(async (t) => {
+        const doc = await t.get(ref);
+        const data = doc.data() || {};
 
-    if(!d.prontos) d.prontos={};
+        if (!data.players) data.players = {};
+        if (!data.prontos) data.prontos = {};
+        if (!data.modo) data.modo = modoSelecionado;
+        if (!data.limiteJogadores) {
+          data.limiteJogadores = data.modo === "1x1" ? 2 : 4;
+        }
 
-    d.prontos[jogadorId]=true;
+        const totalJogadores = Object.keys(data.players).length;
+        const jaEstaNaSala = !!data.players[jogadorId];
 
-    t.update(ref,{prontos:d.prontos});
-  });
-}
+        if (!jaEstaNaSala && totalJogadores >= data.limiteJogadores) {
+          throw new Error("Sala cheia para esse modo.");
+        }
 
-function ouvirSala(){
-  const ref=db.collection("salas").doc(salaId);
+        data.players[jogadorId] = { nome };
+        if (data.prontos[jogadorId] === undefined) {
+          data.prontos[jogadorId] = false;
+        }
 
-  ref.onSnapshot(async doc=>{
-    const d=doc.data();
-    if(!d) return;
+        t.set(ref, data);
+      }).catch((erro) => {
+        alert(erro.message || "Não foi possível entrar na sala.");
+      });
 
-    const lista=document.getElementById("lista");
-    lista.innerHTML="";
-
-    const jogadores=Object.entries(d.players||{});
-    const prontos=d.prontos||{};
-    const limite=d.limiteJogadores || 2;
-
-    jogadores.forEach(([id,j])=>{
-      const li=document.createElement("li");
-      const status=prontos[id]?"✅":"❌";
-      li.innerText=j.nome+" "+status;
-      lista.appendChild(li);
-    });
-
-    const total=jogadores.length;
-    const prontosCount=Object.keys(prontos).length;
-
-    document.getElementById("status").innerText=`Modo: ${d.modo || "1x1"} | ${prontosCount}/${total} prontos | aguardando ${limite} jogador(es)`;
-
-    if(total===limite && prontosCount===total && !d.gameStarted){
-      await ref.update({gameStarted:true});
+      document.getElementById("espera").style.display = "block";
+      ouvirSala();
     }
 
-    if(d.gameStarted){
-      document.getElementById("status").innerText=`JOGO INICIADO! Modo ${d.modo}`;
+    async function ficarPronto() {
+      if (!salaId) {
+        alert("Entre em uma sala primeiro.");
+        return;
+      }
+
+      const ref = db.collection("salas").doc(salaId);
+
+      await db.runTransaction(async (t) => {
+        const doc = await t.get(ref);
+        const data = doc.data() || {};
+
+        if (!data.prontos) data.prontos = {};
+        data.prontos[jogadorId] = true;
+
+        t.update(ref, { prontos: data.prontos });
+      });
     }
-  });
-}
 
-</script>
+    function ouvirSala() {
+      if (salaListener) salaListener();
 
+      const ref = db.collection("salas").doc(salaId);
+
+      salaListener = ref.onSnapshot(async (doc) => {
+        const data = doc.data();
+        if (!data) return;
+
+        const lista = document.getElementById("lista");
+        const status = document.getElementById("status");
+        const modoSala = document.getElementById("modoSala");
+
+        lista.innerHTML = "";
+
+        const players = data.players || {};
+        const prontos = data.prontos || {};
+        const entries = Object.entries(players);
+        const total = entries.length;
+        const limite = data.limiteJogadores || 2;
+
+        entries.forEach(([id, jogador]) => {
+          const li = document.createElement("li");
+          const pronto = prontos[id] ? "✅" : "❌";
+          li.textContent = `${jogador.nome} ${pronto}`;
+          lista.appendChild(li);
+        });
+
+        modoSala.textContent = `Modo da sala: ${data.modo || "1x1"} • Jogadores: ${total}/${limite}`;
+
+        const totalProntos = Object.values(prontos).filter(Boolean).length;
+
+        if (total < limite) {
+          const faltam = limite - total;
+          status.textContent = `Aguardando ${faltam} jogador(es)...`;
+          status.className = "info warning";
+        } else if (totalProntos < limite) {
+          status.textContent = `${totalProntos}/${limite} jogadores prontos`;
+          status.className = "info warning";
+        } else if (!data.gameStarted) {
+          status.textContent = "Todos prontos. Iniciando partida...";
+          status.className = "info success";
+          await ref.update({ gameStarted: true });
+        } else {
+          status.textContent = "JOGO INICIADO!";
+          status.className = "info success";
+        }
+      }, (erro) => {
+        console.error(erro);
+        alert("Erro ao ouvir a sala. Verifique o console.");
+      });
+    }
+  </script>
 </body>
 </html>
