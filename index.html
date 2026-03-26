@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Truco Online PRO+</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Truco Online</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -11,14 +12,11 @@
 body{background:#0f2027;color:white;text-align:center;font-family:sans-serif}
 button{padding:10px;border:none;border-radius:10px;background:#ff9800;color:white}
 input{padding:10px;border-radius:10px;border:none;margin:5px}
-.cartas{display:flex;justify-content:center;gap:10px;margin-top:20px}
-.carta{background:white;color:black;padding:15px;border-radius:10px;cursor:pointer}
 </style>
 </head>
-
 <body>
 
-<h1>🃏 Truco Online PRO+</h1>
+<h1>🃏 Truco Online</h1>
 
 <input id="nome" placeholder="Seu nome">
 <input id="sala" placeholder="Código da sala">
@@ -27,38 +25,17 @@ input{padding:10px;border-radius:10px;border:none;margin:5px}
 <div id="espera" style="display:none">
 <h2>👥 Jogadores</h2>
 <ul id="lista"></ul>
-<p id="statusSala">Aguardando...</p>
 <button onclick="ficarPronto()">Estou pronto ✅</button>
-</div>
-
-<div id="jogo" style="display:none">
-<h2 id="placar"></h2>
-<p id="info"></p>
-<div class="cartas" id="mao"></div>
-<button onclick="truco()">TRUCO 🔥</button>
 <p id="status"></p>
 </div>
 
 <script>
+
 const firebaseConfig = {
   apiKey: "AIzaSyD4YnuGHnyAKtQERG1ojY8Nie00dMDoOAc",
   authDomain: "truco-online-eaab3.firebaseapp.com",
-  projectId: "truco-online-eaab3",
+  projectId: "truco-online-eaab3"
 };
-async function ficarPronto(){
-  const ref = db.collection("salas").doc(salaId);
-
-  await db.runTransaction(async t => {
-    const doc = await t.get(ref);
-    let d = doc.data();
-
-    if(!d.prontos) d.prontos = {}; // 🔥 garante existência
-
-    d.prontos[jogadorId] = true;
-
-    t.update(ref, { prontos: d.prontos });
-  });
-}
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -66,28 +43,15 @@ const db = firebase.firestore();
 let salaId="";
 let jogadorId=Math.random().toString(36).substring(2);
 let nome="";
-let mao=[];
-
-
-const baralho=["4♠","5♠","6♠","7♠","Q♠","J♠","K♠","A♠","2♠","3♠",
-"4♥","5♥","6♥","7♥","Q♥","J♥","K♥","A♥","2♥","3♥",
-"4♦","5♦","6♦","7♦","Q♦","J♦","K♦","A♦","2♦","3♦",
-"4♣","5♣","6♣","7♣","Q♣","J♣","K♣","A♣","2♣","3♣"];
-
-function embaralhar(a){return a.sort(()=>Math.random()-0.5)}
-
-function definirManilha(vira){
-  const ordem=["4","5","6","7","Q","J","K","A","2","3"];
-  let v=vira.slice(0,-1);
-  let i=ordem.indexOf(v);
-  return ordem[(i+1)%ordem.length];
-}
 
 async function entrar(){
   nome=document.getElementById("nome").value;
   salaId=document.getElementById("sala").value;
 
-  if(!nome||!salaId) return alert("Preencha tudo");
+  if(!nome || !salaId){
+    alert("Preencha tudo");
+    return;
+  }
 
   document.getElementById("espera").style.display="block";
 
@@ -97,58 +61,36 @@ async function entrar(){
   if(!doc.exists){
     await ref.set({
       players:{},
-      hands:{},
-      mesa:[],
-      turno:0,
-      pontos:{A:0,B:0},
-      truco:1,
-      rodada:1,
-      rodadasVencidas:{A:0,B:0},
-      vira:null,
-      manilha:null
+      prontos:{},
+      gameStarted:false
     });
   }
 
-await ref.set({
-  players:{},
-  hands:{},
-  mesa:[],
-  turno:0,
-  pontos:{A:0,B:0},
-  truco:1,
-  rodada:1,
-  rodadasVencidas:{A:0,B:0},
-  vira:null,
-  manilha:null,
-  gameStarted:false, // 🔥 AQUI
-  prontos:{}         // 🔥 NOVO
-});
+  await db.runTransaction(async t=>{
+    const snap=await t.get(ref);
+    let d=snap.data();
 
-async function entrarJogador(){
+    if(!d.players) d.players={};
+    d.players[jogadorId]={nome};
+
+    t.set(ref,d);
+  });
+
+  ouvirSala();
+}
+
+async function ficarPronto(){
   const ref=db.collection("salas").doc(salaId);
 
   await db.runTransaction(async t=>{
-    const doc=await t.get(ref);
-    let d=doc.data();
+    const snap=await t.get(ref);
+    let d=snap.data();
 
-    if(!d.players) d.players={};
-    if(!d.hands) d.hands={};
+    if(!d.prontos) d.prontos={};
 
-    d.players[jogadorId]={nome};
+    d.prontos[jogadorId]=true;
 
-    if(!d.hands[jogadorId]){
-      const deck=embaralhar([...baralho]);
-      d.hands[jogadorId]=deck.slice(0,3);
-    }
-
-    if(!d.vira){
-      const deck=embaralhar([...baralho]);
-      d.vira=deck.pop();
-      d.manilha=definirManilha(d.vira);
-    }
-
-    t.set(ref,d);
-    mao=d.hands[jogadorId];
+    t.update(ref,{prontos:d.prontos});
   });
 }
 
@@ -166,135 +108,26 @@ function ouvirSala(){
 
     jogadores.forEach(([id,j])=>{
       const li=document.createElement("li");
-
-      const pronto = prontos[id] ? "✅" : "❌";
-
-      li.innerText = j.nome + " " + pronto;
+      const status=prontos[id]?"✅":"❌";
+      li.innerText=j.nome+" "+status;
       lista.appendChild(li);
     });
 
     const total=jogadores.length;
-    const totalProntos=Object.keys(prontos).length;
+    const prontosCount=Object.keys(prontos).length;
 
-    document.getElementById("statusSala").innerText =
-      `${totalProntos}/${total} prontos`;
+    document.getElementById("status").innerText=`${prontosCount}/${total} prontos`;
 
-    // 🔥 INICIAR JOGO
-    if(total>=2 && total===totalProntos && !d.gameStarted){
+    if(total>=2 && prontosCount===total && !d.gameStarted){
       await ref.update({gameStarted:true});
     }
 
     if(d.gameStarted){
-      iniciarJogo();
+      document.getElementById("status").innerText="JOGO INICIADO!";
     }
   });
 }
 
-function iniciarJogo(){
-  document.getElementById("espera").style.display="none";
-  document.getElementById("jogo").style.display="block";
-  render();
-  ouvirJogo();
-}
-
-function render(){
-  const div=document.getElementById("mao");
-  div.innerHTML="";
-
-  mao.forEach(c=>{
-    const el=document.createElement("div");
-    el.className="carta";
-    el.innerText=c;
-    el.onclick=()=>jogar(c);
-    div.appendChild(el);
-  });
-}
-
-function valorCarta(carta, manilha){
-  const ordem=["4","5","6","7","Q","J","K","A","2","3"];
-  let v=carta.slice(0,-1);
-  if(v===manilha) return 100;
-  return ordem.indexOf(v);
-}
-
-async function jogar(carta){
-  const ref=db.collection("salas").doc(salaId);
-
-  await db.runTransaction(async t=>{
-    const doc=await t.get(ref);
-    let d=doc.data();
-
-    const ids=Object.keys(d.players);
-
-    if(ids[d.turno]!==jogadorId){
-      alert("Não é seu turno!");
-      return;
-    }
-
-    d.mesa.push({jogador:jogadorId,carta});
-    d.turno=(d.turno+1)%ids.length;
-
-    if(d.mesa.length>=2){
-      let maior=d.mesa[0];
-
-      d.mesa.forEach(c=>{
-        if(valorCarta(c.carta,d.manilha)>valorCarta(maior.carta,d.manilha)){
-          maior=c;
-        }
-      });
-
-      const index=ids.indexOf(maior.jogador);
-      let time=(index%2===0)?"A":"B";
-
-      d.rodadasVencidas[time]++;
-      d.mesa=[];
-
-      if(d.rodadasVencidas[time]>=2){
-        d.pontos[time]+=d.truco;
-
-        if(d.pontos[time]>12) d.pontos[time]=12;
-
-        d.rodadasVencidas={A:0,B:0};
-        d.truco=1;
-        d.vira=null;
-      }
-    }
-
-    t.update(ref,d);
-  });
-}
-
-function ouvirJogo(){
-  const ref=db.collection("salas").doc(salaId);
-
-  ref.onSnapshot(doc=>{
-    const d=doc.data();
-
-    document.getElementById("placar").innerText=`${d.pontos.A} x ${d.pontos.B}`;
-    document.getElementById("info").innerText=`Vira: ${d.vira} | Manilha: ${d.manilha}`;
-    document.getElementById("status").innerText=`Truco: ${d.truco}`;
-  });
-}
-
-async function truco(){
-  const ref=db.collection("salas").doc(salaId);
-
-  await db.runTransaction(async t=>{
-    const doc=await t.get(ref);
-    let d=doc.data();
-
-    let v=d.truco;
-
-    if(v>=12){alert("Máximo");return;}
-
-    if(v==1)v=3;
-    else if(v==3)v=6;
-    else if(v==6)v=9;
-    else if(v==9)v=12;
-
-    t.update(ref,{truco:v});
-  });
-}
 </script>
 
 </body>
