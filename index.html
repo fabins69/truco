@@ -321,7 +321,8 @@
             manilha: "",
             trucoPendente: false,
             trucoPedidoPor: "",
-            ultimoVencedor: ""
+            ultimoVencedor: "",
+            ultimaMesa: []
           });
         }
 
@@ -344,6 +345,7 @@
           if (!data.manilha) data.manilha = "";
           if (data.trucoPendente === undefined) data.trucoPendente = false;
           if (!data.trucoPedidoPor) data.trucoPedidoPor = "";
+          if (!data.ultimaMesa) data.ultimaMesa = [];
 
           const totalJogadores = Object.keys(data.players).length;
           const jaEstaNaSala = !!data.players[jogadorId];
@@ -419,6 +421,7 @@
             rodada: 1,
             rodadaAtualVitorias: { A: 0, B: 0 },
             ultimoVencedor: "",
+            ultimaMesa: [],
             vira,
             manilha,
             trucoPendente: false,
@@ -443,6 +446,7 @@
 
       data.hands = novasHands;
       data.mesa = [];
+      data.ultimaMesa = [];
       data.turno = 0;
       data.trucoValor = 1;
       data.rodada = 1;
@@ -491,6 +495,7 @@
             if (!data.rodadaAtualVitorias) data.rodadaAtualVitorias = { A: 0, B: 0 };
             data.rodadaAtualVitorias[time] += 1;
             data.ultimoVencedor = `${players[vencedora.jogador]?.nome || 'Jogador'} venceu a rodada`;
+            data.ultimaMesa = [...data.mesa];
             data.mesa = [];
             data.rodada = (data.rodada || 1) + 1;
             data.turno = ids.indexOf(vencedora.jogador);
@@ -589,7 +594,7 @@
       const ids = idsOrdenados(players);
       const meuTime = timeDoJogador(players, jogadorId);
       const mao = (data.hands && data.hands[jogadorId]) || [];
-      const mesa = data.mesa || [];
+      const mesa = (data.mesa && data.mesa.length > 0) ? data.mesa : (data.ultimaMesa || []);
       const nomeTurno = players[ids[data.turno]]?.nome || "-";
       const minhaVez = ids[data.turno] === jogadorId;
       const pedidoPorOutro = data.trucoPendente && data.trucoPedidoPor !== jogadorId;
