@@ -16,7 +16,7 @@
       min-height: 100vh;
     }
     .container {
-      max-width: 900px;
+      max-width: 1000px;
       margin: 0 auto;
       padding: 30px 16px;
     }
@@ -47,17 +47,13 @@
     }
     button:hover { opacity: 0.92; }
     .box {
-      max-width: 560px;
+      max-width: 700px;
       margin: 20px auto;
       background: rgba(255,255,255,0.06);
       border-radius: 16px;
       padding: 20px;
     }
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 16px 0;
-    }
+    ul { list-style: none; padding: 0; margin: 16px 0; }
     li {
       background: rgba(255,255,255,0.08);
       margin: 8px 0;
@@ -69,6 +65,33 @@
     .warning { color: #ffd166; }
     .error { color: #ff8a8a; font-weight: bold; }
     #debug { white-space: pre-wrap; font-size: 14px; opacity: 0.9; }
+    .mesa-area { margin-top: 12px; }
+    .placar { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+    .mesa-cartas, .mao-cartas {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .carta {
+      width: 90px;
+      height: 130px;
+      background: white;
+      color: black;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      transition: transform 0.15s;
+    }
+    .carta:hover { transform: translateY(-6px); }
+    .carta.usada { opacity: 0.45; cursor: not-allowed; }
+    .subtitulo { opacity: 0.9; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -96,9 +119,22 @@
     </div>
 
     <div id="jogo" class="box" style="display:none">
-      <h2>🎮 Partida iniciada</h2>
-      <p id="infoJogo">A partida começou.</p>
-      <div id="mesaJogo"></div>
+      <div class="placar" id="placar">0 x 0</div>
+      <div class="subtitulo" id="turnoInfo">Turno:</div>
+      <div class="subtitulo" id="rodadaInfo">Rodada: 1</div>
+      <div class="subtitulo" id="trucoInfo">Truco valendo: 1</div>
+      <div class="mesa-area">
+        <h3>🪑 Mesa</h3>
+        <div class="mesa-cartas" id="mesaCartas"></div>
+      </div>
+      <div class="mesa-area">
+        <h3>🖐️ Sua mão</h3>
+        <div class="mao-cartas" id="maoCartas"></div>
+      </div>
+      <div class="mesa-area">
+        <button id="btnTruco" type="button">TRUCO 🔥</button>
+      </div>
+      <p class="info" id="statusJogo">A partida começou.</p>
     </div>
 
     <div id="debug" class="box" style="display:none"></div>
@@ -117,6 +153,14 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    const BARALHO = [
+      "4♠","5♠","6♠","7♠","Q♠","J♠","K♠","A♠","2♠","3♠",
+      "4♥","5♥","6♥","7♥","Q♥","J♥","K♥","A♥","2♥","3♥",
+      "4♦","5♦","6♦","7♦","Q♦","J♦","K♦","A♦","2♦","3♦",
+      "4♣","5♣","6♣","7♣","Q♣","J♣","K♣","A♣","2♣","3♣"
+    ];
+    const ORDEM = ["4","5","6","7","Q","J","K","A","2","3"];
+
     let salaId = "";
     let nome = "";
     let salaListener = null;
@@ -129,7 +173,7 @@
 
     function mostrarErro(msg) {
       document.getElementById("erro").textContent = msg || "";
-      console.error(msg);
+      if (msg) console.error(msg);
     }
 
     function debug(msg) {
@@ -137,6 +181,24 @@
       box.style.display = "block";
       box.textContent = String(msg);
       console.log(msg);
+    }
+
+    function embaralhar(lista) {
+      const a = [...lista];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function valorCarta(carta) {
+      const v = carta.slice(0, -1);
+      return ORDEM.indexOf(v);
+    }
+
+    function idsOrdenados(players) {
+      return Object.keys(players || {}).sort();
     }
 
     async function entrar() {
@@ -161,7 +223,14 @@
             gameStarted: false,
             modo: modoSelecionado,
             limiteJogadores: modoSelecionado === "1x1" ? 2 : 4,
-            criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+            hands: {},
+            mesa: [],
+            turno: 0,
+            pontos: { A: 0, B: 0 },
+            truco: 1,
+            rodada: 1,
+            rodadaAtualVitorias: { A: 0, B: 0 }
           });
         }
 
@@ -171,8 +240,15 @@
 
           if (!data.players) data.players = {};
           if (!data.prontos) data.prontos = {};
+          if (!data.hands) data.hands = {};
+          if (!data.mesa) data.mesa = [];
           if (!data.modo) data.modo = modoSelecionado;
           if (!data.limiteJogadores) data.limiteJogadores = data.modo === "1x1" ? 2 : 4;
+          if (!data.pontos) data.pontos = { A: 0, B: 0 };
+          if (data.turno === undefined) data.turno = 0;
+          if (!data.rodadaAtualVitorias) data.rodadaAtualVitorias = { A: 0, B: 0 };
+          if (!data.truco) data.truco = 1;
+          if (!data.rodada) data.rodada = 1;
 
           const totalJogadores = Object.keys(data.players).length;
           const jaEstaNaSala = !!data.players[jogadorId];
@@ -215,6 +291,168 @@
       }
     }
 
+    async function iniciarPartidaSeNecessario(data) {
+      const ref = db.collection("salas").doc(salaId);
+      const limite = data.limiteJogadores || 2;
+      const total = Object.keys(data.players || {}).length;
+      const totalProntos = Object.values(data.prontos || {}).filter(Boolean).length;
+
+      if (total === limite && totalProntos === limite && !data.gameStarted) {
+        await db.runTransaction(async (t) => {
+          const doc = await t.get(ref);
+          const d = doc.data() || {};
+          if (d.gameStarted) return;
+
+          const jogadores = idsOrdenados(d.players || {});
+          const deck = embaralhar(BARALHO);
+          const hands = {};
+
+          for (let i = 0; i < jogadores.length; i++) {
+            hands[jogadores[i]] = deck.splice(0, 3);
+          }
+
+          t.update(ref, {
+            gameStarted: true,
+            hands,
+            mesa: [],
+            turno: 0,
+            pontos: d.pontos || { A: 0, B: 0 },
+            truco: 1,
+            rodada: 1,
+            rodadaAtualVitorias: { A: 0, B: 0 },
+            ultimoVencedor: ""
+          });
+        });
+      }
+    }
+
+    function timeDoJogador(players, id) {
+      const ids = idsOrdenados(players);
+      const idx = ids.indexOf(id);
+      return idx % 2 === 0 ? "A" : "B";
+    }
+
+    async function jogarCarta(carta) {
+      try {
+        const ref = db.collection("salas").doc(salaId);
+        await db.runTransaction(async (t) => {
+          const doc = await t.get(ref);
+          const data = doc.data() || {};
+          const players = data.players || {};
+          const ids = idsOrdenados(players);
+
+          if (!data.gameStarted) throw new Error("A partida ainda não começou.");
+          if (ids[data.turno] !== jogadorId) throw new Error("Não é seu turno.");
+          if (!data.hands || !data.hands[jogadorId]) throw new Error("Sua mão não foi encontrada.");
+          if (!data.hands[jogadorId].includes(carta)) throw new Error("Carta inválida.");
+
+          data.hands[jogadorId] = data.hands[jogadorId].filter(c => c !== carta);
+          data.mesa = data.mesa || [];
+          data.mesa.push({ jogador: jogadorId, carta });
+          data.turno = (data.turno + 1) % ids.length;
+
+          const cartasNecessarias = data.modo === "1x1" ? 2 : 4;
+
+          if (data.mesa.length >= cartasNecessarias) {
+            let vencedora = data.mesa[0];
+            for (const item of data.mesa) {
+              if (valorCarta(item.carta) > valorCarta(vencedora.carta)) {
+                vencedora = item;
+              }
+            }
+
+            const time = timeDoJogador(players, vencedora.jogador);
+            if (!data.rodadaAtualVitorias) data.rodadaAtualVitorias = { A: 0, B: 0 };
+            data.rodadaAtualVitorias[time] += 1;
+            data.ultimoVencedor = `${players[vencedora.jogador]?.nome || 'Jogador'} venceu a rodada`;
+            data.mesa = [];
+            data.rodada = (data.rodada || 1) + 1;
+            data.turno = ids.indexOf(vencedora.jogador);
+
+            if (data.rodadaAtualVitorias[time] >= 2 || data.rodada > 3) {
+              if (!data.pontos) data.pontos = { A: 0, B: 0 };
+              data.pontos[time] = Math.min(12, (data.pontos[time] || 0) + (data.truco || 1));
+              data.ultimoVencedor = `Time ${time} venceu a mão`;
+
+              const novoDeck = embaralhar(BARALHO);
+              const novasHands = {};
+              for (let i = 0; i < ids.length; i++) {
+                novasHands[ids[i]] = novoDeck.splice(0, 3);
+              }
+
+              data.hands = novasHands;
+              data.mesa = [];
+              data.turno = 0;
+              data.truco = 1;
+              data.rodada = 1;
+              data.rodadaAtualVitorias = { A: 0, B: 0 };
+            }
+          }
+
+          t.set(ref, data);
+        });
+      } catch (erro) {
+        mostrarErro(erro.message || "Não foi possível jogar a carta.");
+      }
+    }
+
+    async function pedirTruco() {
+      try {
+        const ref = db.collection("salas").doc(salaId);
+        await db.runTransaction(async (t) => {
+          const doc = await t.get(ref);
+          const data = doc.data() || {};
+          let v = data.truco || 1;
+          if (v >= 12) return;
+          if (v === 1) v = 3;
+          else if (v === 3) v = 6;
+          else if (v === 6) v = 9;
+          else if (v === 9) v = 12;
+          t.update(ref, { truco: v });
+        });
+      } catch (erro) {
+        mostrarErro(erro.message || "Não foi possível pedir truco.");
+      }
+    }
+
+    function renderJogo(data) {
+      const players = data.players || {};
+      const ids = idsOrdenados(players);
+      const meuTime = timeDoJogador(players, jogadorId);
+      const mao = (data.hands && data.hands[jogadorId]) || [];
+      const mesa = data.mesa || [];
+      const nomeTurno = players[ids[data.turno]]?.nome || "-";
+
+      document.getElementById("placar").textContent = `${data.pontos?.A || 0} x ${data.pontos?.B || 0}`;
+      document.getElementById("turnoInfo").textContent = `Turno: ${nomeTurno} • Seu time: ${meuTime}`;
+      document.getElementById("rodadaInfo").textContent = `Rodada: ${data.rodada || 1}`;
+      document.getElementById("trucoInfo").textContent = `Truco valendo: ${data.truco || 1}`;
+      document.getElementById("statusJogo").textContent = data.ultimoVencedor || "Jogo em andamento";
+
+      const mesaDiv = document.getElementById("mesaCartas");
+      mesaDiv.innerHTML = "";
+      if (mesa.length === 0) {
+        mesaDiv.innerHTML = "<p>Nenhuma carta na mesa.</p>";
+      } else {
+        mesa.forEach(item => {
+          const carta = document.createElement("div");
+          carta.className = "carta usada";
+          carta.textContent = item.carta;
+          mesaDiv.appendChild(carta);
+        });
+      }
+
+      const maoDiv = document.getElementById("maoCartas");
+      maoDiv.innerHTML = "";
+      mao.forEach(c => {
+        const carta = document.createElement("div");
+        carta.className = "carta";
+        carta.textContent = c;
+        carta.addEventListener("click", () => jogarCarta(c));
+        maoDiv.appendChild(carta);
+      });
+    }
+
     function ouvirSala() {
       if (salaListener) salaListener();
       const ref = db.collection("salas").doc(salaId);
@@ -245,24 +483,25 @@
           modoSala.textContent = `Modo da sala: ${data.modo || "1x1"} • Jogadores: ${total}/${limite}`;
           const totalProntos = Object.values(prontos).filter(Boolean).length;
 
-          if (total < limite) {
-            const faltam = limite - total;
-            status.textContent = `Aguardando ${faltam} jogador(es)...`;
-            status.className = "info warning";
-          } else if (totalProntos < limite) {
-            status.textContent = `${totalProntos}/${limite} jogadores prontos`;
-            status.className = "info warning";
-          } else if (!data.gameStarted) {
-            status.textContent = "Todos prontos. Iniciando partida...";
-            status.className = "info success";
-            await ref.update({ gameStarted: true });
-          } else {
-            status.textContent = "JOGO INICIADO!";
-            status.className = "info success";
+          if (!data.gameStarted) {
+            if (total < limite) {
+              const faltam = limite - total;
+              status.textContent = `Aguardando ${faltam} jogador(es)...`;
+              status.className = "info warning";
+            } else if (totalProntos < limite) {
+              status.textContent = `${totalProntos}/${limite} jogadores prontos`;
+              status.className = "info warning";
+            } else {
+              status.textContent = "Todos prontos. Iniciando partida...";
+              status.className = "info success";
+            }
+            await iniciarPartidaSeNecessario(data);
+          }
+
+          if (data.gameStarted) {
             document.getElementById("espera").style.display = "none";
             document.getElementById("jogo").style.display = "block";
-            document.getElementById("infoJogo").textContent = `Modo ${data.modo || "1x1"} iniciado com ${total} jogador(es).`;
-            document.getElementById("mesaJogo").innerHTML = `<p>✅ Agora a tela do jogo abriu corretamente.</p>`;
+            renderJogo(data);
           }
         } catch (erro) {
           mostrarErro(erro.message || "Erro ao atualizar sala.");
@@ -274,6 +513,7 @@
 
     document.getElementById("btnEntrar").addEventListener("click", entrar);
     document.getElementById("btnPronto").addEventListener("click", ficarPronto);
+    document.getElementById("btnTruco").addEventListener("click", pedirTruco);
   </script>
 </body>
 </html>
