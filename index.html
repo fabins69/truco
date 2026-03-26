@@ -244,23 +244,22 @@
     }
 
     function proximoValorTruco(atual) {
-      if (atual === 1) return 3;
-      if (atual === 3) return 6;
-      if (atual === 6) return 9;
-      if (atual === 9) return 12;
-      return 12;
-    }
+  if (atual === 1) return 3;
+  if (atual === 3) return 6;
+  if (atual === 6) return 9;
+  if (atual === 9) return 12;
+  return 12;
+}
+function podePedirAumento(data) {
+  const ultimoValor = data.trucoValor || 1;
+  const ultimoAceitou = data.trucoAceitoPor || "";
+  const ultimoPediu = data.trucoPedidoPorUltimo || "";
 
-    function podePedirAumento(data) {
-      const ultimoValor = data.trucoValor || 1;
-      const ultimoAceitou = data.trucoAceitoPor || "";
-      const ultimoPediu = data.trucoPedidoPorUltimo || "";
+  if (ultimoValor === 1) return true;
+  if (!ultimoAceitou) return false;
 
-      if (ultimoValor === 1) return true;
-      if (!ultimoAceitou) return false;
-      return jogadorId === ultimoAceitou && jogadorId !== ultimoPediu;
-    }
-
+  return jogadorId === ultimoAceitou && jogadorId !== ultimoPediu;
+}
     async function entrar() {
       try {
         mostrarErro("");
@@ -278,28 +277,27 @@
 
         if (!snap.exists) {
           await ref.set({
-            players: {},
-            prontos: {},
-            gameStarted: false,
-            modo: modoSelecionado,
-            limiteJogadores: modoSelecionado === "1x1" ? 2 : 4,
-            criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-            hands: {},
-            mesa: [],
-            turno: 0,
-            pontos: { A: 0, B: 0 },
-            trucoValor: 1,
-            trucoPedidoPorUltimo: "",
-            trucoAceitoPor: "",
-            rodada: 1,
-            rodadaAtualVitorias: { A: 0, B: 0 },           rodada: 1,
-            rodadaAtualVitorias: { A: 0, B: 0 },
-            vira: "",
-            manilha: "",
-            trucoPendente: false,
-            trucoPedidoPor: "",
-            ultimoVencedor: ""
-          });
+  players: {},
+  prontos: {},
+  gameStarted: false,
+  modo: modoSelecionado,
+  limiteJogadores: modoSelecionado === "1x1" ? 2 : 4,
+  criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
+  hands: {},
+  mesa: [],
+  turno: 0,
+  pontos: { A: 0, B: 0 },
+  trucoValor: 1,
+  trucoPedidoPorUltimo: "",
+  trucoAceitoPor: "",
+  rodada: 1,
+  rodadaAtualVitorias: { A: 0, B: 0 },
+  vira: "",
+  manilha: "",
+  trucoPendente: false,
+  trucoPedidoPor: "",
+  ultimoVencedor: ""
+});
         }
 
         await db.runTransaction(async (t) => {
@@ -316,14 +314,16 @@
           if (data.turno === undefined) data.turno = 0;
           if (!data.rodadaAtualVitorias) data.rodadaAtualVitorias = { A: 0, B: 0 };
           if (!data.trucoValor) data.trucoValor = 1;
-          if (!data.trucoPedidoPorUltimo) data.trucoPedidoPorUltimo = "";
-          if (!data.trucoAceitoPor) data.trucoAceitoPor = "";
           if (!data.rodada) data.rodada = 1;
           if (!data.vira) data.vira = "";
           if (!data.manilha) data.manilha = "";
           if (data.trucoPendente === undefined) data.trucoPendente = false;
           if (!data.trucoPedidoPor) data.trucoPedidoPor = "";
-
+          if (!data.trucoValor) data.trucoValor = 1;
+if (!data.trucoPedidoPorUltimo) data.trucoPedidoPorUltimo = "";
+if (!data.trucoAceitoPor) data.trucoAceitoPor = "";
+if (!data.rodada) data.rodada = 1;
+        
           const totalJogadores = Object.keys(data.players).length;
           const jaEstaNaSala = !!data.players[jogadorId];
 
@@ -418,18 +418,15 @@
       const vira = novoDeck.pop();
       const manilha = definirManilha(vira);
 
-      data.hands = novasHands;
-      data.mesa = [];
-      data.turno = 0;
-      data.trucoValor = 1;
-      data.trucoPedidoPorUltimo = "";
-      data.trucoAceitoPor = "";
-      data.rodada = 1;
-      data.rodadaAtualVitorias = { A: 0, B: 0 };
-      data.vira = vira;
-      data.manilha = manilha;
-      data.trucoPendente = false;
-      data.trucoPedidoPor = "";
+     data.trucoValor = 1;
+data.trucoPedidoPorUltimo = "";
+data.trucoAceitoPor = "";
+data.rodada = 1;
+data.rodadaAtualVitorias = { A: 0, B: 0 };
+data.vira = vira;
+data.manilha = manilha;
+data.trucoPendente = false;
+data.trucoPedidoPor = "";
       if (vencedorTime) {
         data.ultimoVencedor = `Time ${vencedorTime} venceu a mão`;
       }
@@ -475,9 +472,9 @@
 
             if (data.rodadaAtualVitorias[time] >= 2 || data.rodada > 3) {
               if (!data.pontos) data.pontos = { A: 0, B: 0 };
-              data.pontos[time] = Math.min(12, (data.pontos[time] || 0) + (data.trucoValor || 1));
-              data.ultimoVencedor = `${players[vencedora.jogador]?.nome || 'Jogador'} fez a rodada decisiva. Time ${time} ganhou a mão.`;
-              await distribuirNovaMao(ref, data, time);
+            data.pontos[time] = Math.min(12, (data.pontos[time] || 0) + (data.trucoValor || 1));
+data.ultimoVencedor = `${players[vencedora.jogador]?.nome || "Jogador"} fez a rodada decisiva. Time ${time} ganhou a mão.`;
+await distribuirNovaMao(ref, data, time);
             }
           }
 
@@ -488,84 +485,86 @@
       }
     }
 
-    async function pedirTruco() {
-      try {
-        const ref = db.collection("salas").doc(salaId);
-        await db.runTransaction(async (t) => {
-          const doc = await t.get(ref);
-          const data = doc.data() || {};
-          const players = data.players || {};
-          const ids = idsOrdenados(players);
+   async function pedirTruco() {
+  try {
+    const ref = db.collection("salas").doc(salaId);
 
-          if (!data.gameStarted) throw new Error("A partida ainda não começou.");
-          if (data.trucoPendente) throw new Error("Já existe um truco pendente.");
-          if (ids[data.turno] !== jogadorId) throw new Error("Só quem está no turno pode pedir.");
-          if ((data.trucoValor || 1) >= 12) throw new Error("A mão já está valendo 12.");
-          if (!podePedirAumento(data)) throw new Error("Agora só o adversário que aceitou pode aumentar.");
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(ref);
+      const data = doc.data() || {};
+      const players = data.players || {};
+      const ids = idsOrdenados(players);
 
-          const proximo = proximoValorTruco(data.trucoValor || 1);
-          data.trucoPendente = true;
-          data.trucoPedidoPor = jogadorId;
-          data.trucoProposto = proximo;
-          data.ultimoVencedor = `${players[jogadorId]?.nome || 'Jogador'} pediu ${proximo === 3 ? 'TRUCO' : proximo}`;
+      if (!data.gameStarted) throw new Error("A partida ainda não começou.");
+      if (data.trucoPendente) throw new Error("Já existe um truco pendente.");
+      if (ids[data.turno] !== jogadorId) throw new Error("Só quem está no turno pode pedir.");
+      if ((data.trucoValor || 1) >= 12) throw new Error("A mão já está valendo 12.");
+      if (!podePedirAumento(data)) throw new Error("Agora só quem aceitou a última aposta pode aumentar.");
 
-          t.set(ref, data);
-        });
-      } catch (erro) {
-        mostrarErro(erro.message || "Não foi possível pedir truco.");
-      }
-    }
+      const proximo = proximoValorTruco(data.trucoValor || 1);
 
-    async function aceitarTruco() {
-      try {
-        const ref = db.collection("salas").doc(salaId);
-        await db.runTransaction(async (t) => {
-          const doc = await t.get(ref);
-          const data = doc.data() || {};
-          const players = data.players || {};
+      data.trucoPendente = true;
+      data.trucoPedidoPor = jogadorId;
+      data.trucoProposto = proximo;
+      data.ultimoVencedor = `${players[jogadorId]?.nome || "Jogador"} pediu ${proximo === 3 ? "TRUCO" : proximo}`;
 
-          if (!data.trucoPendente) throw new Error("Não há truco pendente.");
-          if (data.trucoPedidoPor === jogadorId) throw new Error("Quem pediu não pode aceitar.");
+      t.set(ref, data);
+    });
+  } catch (erro) {
+    mostrarErro(erro.message || "Não foi possível pedir truco.");
+  }
+}
+   async function aceitarTruco() {
+  try {
+    const ref = db.collection("salas").doc(salaId);
 
-          data.trucoValor = data.trucoProposto || data.trucoValor || 1;
-          data.trucoAceitoPor = jogadorId;
-          data.trucoPedidoPorUltimo = data.trucoPedidoPor || "";
-          data.trucoPendente = false;
-          data.trucoPedidoPor = "";
-          data.trucoProposto = null;
-          data.ultimoVencedor = `${players[jogadorId]?.nome || 'Jogador'} aceitou. A mão agora vale ${data.trucoValor}.`;
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(ref);
+      const data = doc.data() || {};
+      const players = data.players || {};
 
-          t.set(ref, data);
-        });
-      } catch (erro) {
-        mostrarErro(erro.message || "Não foi possível aceitar.");
-      }
-    }
+      if (!data.trucoPendente) throw new Error("Não há truco pendente.");
+      if (data.trucoPedidoPor === jogadorId) throw new Error("Quem pediu não pode aceitar.");
 
-    async function correrTruco() {
-      try {
-        const ref = db.collection("salas").doc(salaId);
-        await db.runTransaction(async (t) => {
-          const doc = await t.get(ref);
-          const data = doc.data() || {};
-          const players = data.players || {};
+      data.trucoValor = data.trucoProposto || data.trucoValor || 1;
+      data.trucoAceitoPor = jogadorId;
+      data.trucoPedidoPorUltimo = data.trucoPedidoPor || "";
+      data.trucoPendente = false;
+      data.trucoPedidoPor = "";
+      data.trucoProposto = null;
+      data.ultimoVencedor = `${players[jogadorId]?.nome || "Jogador"} aceitou. A mão agora vale ${data.trucoValor}.`;
 
-          if (!data.trucoPendente) throw new Error("Não há truco pendente.");
-          if (data.trucoPedidoPor === jogadorId) throw new Error("Quem pediu não pode correr.");
+      t.set(ref, data);
+    });
+  } catch (erro) {
+    mostrarErro(erro.message || "Não foi possível aceitar.");
+  }
+}
+   async function correrTruco() {
+  try {
+    const ref = db.collection("salas").doc(salaId);
 
-          const timePediu = timeDoJogador(players, data.trucoPedidoPor);
-          if (!data.pontos) data.pontos = { A: 0, B: 0 };
-          data.pontos[timePediu] = Math.min(12, (data.pontos[timePediu] || 0) + (data.trucoValor || 1));
-          data.ultimoVencedor = `${players[jogadorId]?.nome || 'Jogador'} correu. Time ${timePediu} ganhou a mão e pontuou.`;
+    await db.runTransaction(async (t) => {
+      const doc = await t.get(ref);
+      const data = doc.data() || {};
+      const players = data.players || {};
 
-          await distribuirNovaMao(ref, data, null);
-          t.set(ref, data);
-        });
-      } catch (erro) {
-        mostrarErro(erro.message || "Não foi possível correr.");
-      }
-    }
+      if (!data.trucoPendente) throw new Error("Não há truco pendente.");
+      if (data.trucoPedidoPor === jogadorId) throw new Error("Quem pediu não pode correr.");
 
+      const timePediu = timeDoJogador(players, data.trucoPedidoPor);
+
+      if (!data.pontos) data.pontos = { A: 0, B: 0 };
+      data.pontos[timePediu] = Math.min(12, (data.pontos[timePediu] || 0) + (data.trucoValor || 1));
+      data.ultimoVencedor = `${players[jogadorId]?.nome || "Jogador"} correu. Time ${timePediu} ganhou a mão e pontuou.`;
+
+      await distribuirNovaMao(ref, data, null);
+      t.set(ref, data);
+    });
+  } catch (erro) {
+    mostrarErro(erro.message || "Não foi possível correr.");
+  }
+}
     function renderJogo(data) {
       const players = data.players || {};
       const ids = idsOrdenados(players);
@@ -573,10 +572,12 @@
       const mao = (data.hands && data.hands[jogadorId]) || [];
       const mesa = data.mesa || [];
       const nomeTurno = players[ids[data.turno]]?.nome || "-";
-      const pedidoPorOutro = data.trucoPendente && data.trucoPedidoPor !== jogadorId;
-
+const minhaVez = ids[data.turno] === jogadorId;
+const pedidoPorOutro = data.trucoPendente && data.trucoPedidoPor !== jogadorId;
       document.getElementById("placar").textContent = `${data.pontos?.A || 0} x ${data.pontos?.B || 0}`;
-      document.getElementById("turnoInfo").textContent = `Turno: ${nomeTurno} • Seu time: ${meuTime}`;
+      document.getElementById("turnoInfo").textContent = minhaVez
+  ? `É sua vez • Seu time: ${meuTime}`
+  : `Vez de ${nomeTurno} • Seu time: ${meuTime}`;
       document.getElementById("rodadaInfo").textContent = `Rodada: ${data.rodada || 1}`;
       document.getElementById("trucoInfo").textContent = `Mão valendo: ${data.trucoValor || 1}`;
       document.getElementById("statusJogo").textContent = data.ultimoVencedor || "Jogo em andamento";
@@ -614,14 +615,15 @@
       document.getElementById("btnCorrer").style.display = pedidoPorOutro ? "inline-block" : "none";
 
       const btnTruco = document.getElementById("btnTruco");
-      const proximo = proximoValorTruco(data.trucoValor || 1);
+const podeAumentar = podePedirAumento(data);
+const proximo = proximoValorTruco(data.trucoValor || 1);
       let nomeBotao = "Pedir Truco";
       if ((data.trucoValor || 1) === 3) nomeBotao = "Pedir 6";
       if ((data.trucoValor || 1) === 6) nomeBotao = "Pedir 9";
       if ((data.trucoValor || 1) === 9) nomeBotao = "Pedir 12";
       if ((data.trucoValor || 1) >= 12) nomeBotao = "Máximo 12";
       btnTruco.textContent = nomeBotao;
-      btnTruco.disabled = !!data.trucoPendente || (data.trucoValor || 1) >= 12;
+btnTruco.disabled = !!data.trucoPendente || (data.trucoValor || 1) >= 12 || !minhaVez || !podeAumentar;
     }
 
     function ouvirSala() {
