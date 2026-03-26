@@ -7,20 +7,44 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <style>
+    :root {
+      --bg1: #06141d;
+      --bg2: #0c3142;
+      --panel: rgba(255,255,255,0.08);
+      --panel2: rgba(255,255,255,0.12);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.82);
+      --accent: #ff9800;
+      --accent2: #ffb74d;
+      --danger: #e53935;
+      --secondary: #546e7a;
+      --success: #6cff8a;
+      --warning: #ffd166;
+      --shadow: 0 10px 28px rgba(0,0,0,.32);
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #071a24, #0b2f3d);
-      color: white;
+      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+      color: var(--text);
       text-align: center;
       min-height: 100vh;
     }
+
     .container {
-      max-width: 1150px;
+      max-width: 1180px;
       margin: 0 auto;
       padding: 24px 16px 40px;
     }
-    h1 { margin-bottom: 18px; }
+
+    h1 {
+      margin-bottom: 18px;
+      letter-spacing: .4px;
+    }
+
     .topbar {
       display: flex;
       justify-content: center;
@@ -28,88 +52,120 @@
       flex-wrap: wrap;
       margin-bottom: 20px;
     }
+
     input, select {
       padding: 12px;
       border: none;
       border-radius: 12px;
       min-width: 160px;
       font-size: 16px;
+      background: #fff;
+      color: #111;
     }
+
     button {
       padding: 12px 18px;
       border: none;
       border-radius: 12px;
-      background: #ff9800;
+      background: var(--accent);
       color: white;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
+      box-shadow: var(--shadow);
     }
-    button:hover { opacity: 0.92; }
+
+    button:hover { opacity: 0.94; }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .secondary { background: #546e7a; }
-    .danger { background: #e53935; }
+    .secondary { background: var(--secondary); }
+    .danger { background: var(--danger); }
+
     .box {
-      max-width: 920px;
+      max-width: 980px;
       margin: 20px auto;
-      background: rgba(255,255,255,0.06);
-      border-radius: 16px;
+      background: var(--panel);
+      border-radius: 18px;
       padding: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
     }
+
     ul { list-style: none; padding: 0; margin: 16px 0; }
     li {
-      background: rgba(255,255,255,0.08);
+      background: var(--panel2);
       margin: 8px 0;
       padding: 10px;
       border-radius: 10px;
     }
+
     .info { margin-top: 12px; font-size: 16px; }
-    .success { color: #6cff8a; font-weight: bold; }
-    .warning { color: #ffd166; }
+    .success { color: var(--success); font-weight: bold; }
+    .warning { color: var(--warning); }
     .error { color: #ff8a8a; font-weight: bold; }
     #debug { white-space: pre-wrap; font-size: 14px; opacity: 0.9; }
-    .mesa-area { margin-top: 14px; }
+
+    .mesa-area { margin-top: 16px; }
     .placar {
       font-size: 22px;
       font-weight: bold;
       margin-bottom: 10px;
       line-height: 1.7;
+      background: rgba(0,0,0,.18);
+      border-radius: 14px;
+      padding: 10px;
     }
-    .mesa-cartas, .mao-cartas, .linha-botoes, .resumo-rodadas {
+
+    .mesa-cartas, .mao-cartas, .linha-botoes, .resumo-rodadas, .linha-acoes {
       display: flex;
       justify-content: center;
       gap: 12px;
       flex-wrap: wrap;
       margin-top: 12px;
     }
+
     .carta-wrap {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 6px;
     }
+
     .carta-nome {
       font-size: 14px;
-      opacity: 0.9;
+      opacity: 0.92;
     }
+
     .carta {
-      width: 90px;
-      height: 130px;
+      width: 92px;
+      height: 132px;
       background: white;
       color: black;
-      border-radius: 12px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 24px;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-      transition: transform 0.15s;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.28);
+      transition: transform 0.15s, outline 0.15s;
+      user-select: none;
     }
+
     .carta:hover { transform: translateY(-6px); }
     .carta.usada { opacity: 0.45; cursor: not-allowed; }
-    .subtitulo { opacity: 0.9; margin-top: 8px; }
+    .carta.selecionada {
+      outline: 4px solid var(--accent2);
+      transform: translateY(-8px);
+    }
+
+    .carta.encoberta {
+      background: linear-gradient(135deg, #1d3557, #0d1b2a);
+      color: #d0e6ff;
+      border: 2px solid rgba(255,255,255,0.12);
+    }
+
+    .subtitulo { opacity: 0.95; margin-top: 8px; }
     .vira-box {
       display: flex;
       justify-content: center;
@@ -118,12 +174,27 @@
       margin-top: 10px;
       flex-wrap: wrap;
     }
+
     .badge {
       min-width: 38px;
       padding: 8px 10px;
       border-radius: 999px;
       background: rgba(255,255,255,0.12);
       font-weight: bold;
+    }
+
+    .timer {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--warning);
+    }
+
+    .fim {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--success);
+      margin-top: 14px;
     }
   </style>
 </head>
@@ -156,6 +227,7 @@
       <div class="subtitulo" id="turnoInfo">Turno:</div>
       <div class="subtitulo" id="rodadaInfo">Rodada: 1</div>
       <div class="subtitulo" id="trucoInfo">Mão valendo: 1</div>
+      <div class="timer" id="timerInfo">Tempo: --</div>
 
       <div class="vira-box">
         <div>🪄 Vira/Tombo:</div>
@@ -178,6 +250,11 @@
         <div class="mao-cartas" id="maoCartas"></div>
       </div>
 
+      <div class="mesa-area linha-acoes">
+        <button id="btnJogarSelecionada" type="button" class="secondary">Jogar carta selecionada</button>
+        <button id="btnEncobrir" type="button" class="secondary">Encobrir</button>
+      </div>
+
       <div class="mesa-area linha-botoes">
         <button id="btnTruco" type="button">Pedir Truco</button>
         <button id="btnAceitar" type="button" class="secondary">Aceitar</button>
@@ -185,6 +262,7 @@
       </div>
 
       <p class="info" id="statusJogo">A partida começou.</p>
+      <div id="fimPartida" class="fim" style="display:none"></div>
     </div>
 
     <div id="debug" class="box" style="display:none"></div>
@@ -211,10 +289,12 @@
     ];
     const ORDEM = ["4","5","6","7","Q","J","K","A","2","3"];
     const ORDEM_NAIPES = { "♣": 1, "♥": 2, "♠": 3, "♦": 4 };
+    const TEMPO_JOGADA = 20;
 
     let salaId = "";
     let nome = "";
     let salaListener = null;
+    let cartaSelecionada = null;
 
     let jogadorId = sessionStorage.getItem("truco_jogador_id");
     if (!jogadorId) {
@@ -247,13 +327,8 @@
       return Object.keys(players || {}).sort();
     }
 
-    function valorFace(carta) {
-      return carta.slice(0, -1);
-    }
-
-    function naipeCarta(carta) {
-      return carta.slice(-1);
-    }
+    function valorFace(carta) { return carta.slice(0, -1); }
+    function naipeCarta(carta) { return carta.slice(-1); }
 
     function definirManilha(vira) {
       const face = valorFace(vira);
@@ -262,6 +337,7 @@
     }
 
     function forcaCarta(carta, manilha) {
+      if (carta === "🂠") return -1;
       const face = valorFace(carta);
       const naipe = naipeCarta(carta);
       if (face === manilha) return 100 + (ORDEM_NAIPES[naipe] || 0);
@@ -312,9 +388,7 @@
       if (rodadas.length === 1) return null;
 
       if (r1 === "E") {
-        if (rodadas.length === 2) {
-          return r2 && r2 !== "E" ? r2 : null;
-        }
+        if (rodadas.length === 2) return r2 && r2 !== "E" ? r2 : null;
         if (r2 === "E" && r3 === "E") return maoInicialTime;
         if (r2 === "E") return r3 && r3 !== "E" ? r3 : maoInicialTime;
         return r2;
@@ -325,6 +399,18 @@
       if (rodadas.length < 3) return null;
       if (r3 === "E") return r1;
       return r3 || null;
+    }
+
+    function tempoRestante(data) {
+      if (!data.turnStartedAt) return TEMPO_JOGADA;
+      const inicio = data.turnStartedAt.toMillis ? data.turnStartedAt.toMillis() : data.turnStartedAt;
+      const agora = Date.now();
+      const passou = Math.floor((agora - inicio) / 1000);
+      return Math.max(0, TEMPO_JOGADA - passou);
+    }
+
+    function fimDePartida(data) {
+      return (data.pontos?.A || 0) >= 12 || (data.pontos?.B || 0) >= 12;
     }
 
     async function entrar() {
@@ -367,7 +453,10 @@
             trucoPedidoPor: "",
             trucoProposto: null,
             maoInicialTime: "A",
-            ultimoVencedor: ""
+            ultimoVencedor: "",
+            turnStartedAt: null,
+            partidaEncerrada: false,
+            vencedorFinal: ""
           });
         }
 
@@ -396,6 +485,8 @@
           if (data.trucoProposto === undefined) data.trucoProposto = null;
           if (!data.maoInicialTime) data.maoInicialTime = "A";
           if (!data.ultimoVencedor) data.ultimoVencedor = "";
+          if (data.partidaEncerrada === undefined) data.partidaEncerrada = false;
+          if (!data.vencedorFinal) data.vencedorFinal = "";
 
           const totalJogadores = Object.keys(data.players).length;
           const jaEstaNaSala = !!data.players[jogadorId];
@@ -468,7 +559,10 @@
             trucoPendente: false,
             trucoPedidoPor: "",
             trucoProposto: null,
-            maoInicialTime: "A"
+            maoInicialTime: "A",
+            turnStartedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            partidaEncerrada: false,
+            vencedorFinal: ""
           });
         });
       }
@@ -498,10 +592,16 @@
       data.trucoPedidoPor = "";
       data.trucoProposto = null;
       data.maoInicialTime = vencedorTime || data.maoInicialTime || "A";
+      data.turnStartedAt = Date.now();
       if (vencedorTime) data.ultimoVencedor = `${nomeDoTime(players, vencedorTime)} venceu a mão`;
+      if ((data.pontos?.A || 0) >= 12 || (data.pontos?.B || 0) >= 12) {
+        data.partidaEncerrada = true;
+        const vencedorFinal = (data.pontos?.A || 0) >= 12 ? "A" : "B";
+        data.vencedorFinal = nomeDoTime(players, vencedorFinal);
+      }
     }
 
-    async function jogarCarta(carta) {
+    async function jogarCartaInterna(carta, encoberta = false) {
       try {
         const ref = db.collection("salas").doc(salaId);
         await db.runTransaction(async (t) => {
@@ -511,6 +611,7 @@
           const ids = idsOrdenados(players);
 
           if (!data.gameStarted) throw new Error("A partida ainda não começou.");
+          if (data.partidaEncerrada) throw new Error("A partida já acabou.");
           if (data.trucoPendente) throw new Error("Responda ao truco antes de jogar.");
           if (ids[data.turno] !== jogadorId) throw new Error("Não é sua vez.");
           if (!data.hands || !data.hands[jogadorId]) throw new Error("Suas cartas não foram encontradas.");
@@ -518,15 +619,17 @@
 
           data.hands[jogadorId] = data.hands[jogadorId].filter(c => c !== carta);
           data.mesa = data.mesa || [];
-          data.mesa.push({ jogador: jogadorId, carta });
+          data.mesa.push({ jogador: jogadorId, carta: encoberta ? "🂠" : carta, real: carta, encoberta: !!encoberta });
           data.turno = (data.turno + 1) % ids.length;
+          data.turnStartedAt = Date.now();
 
           const cartasNecessarias = data.modo === "1x1" ? 2 : 4;
           if (data.mesa.length >= cartasNecessarias) {
-            let maior = forcaCarta(data.mesa[0].carta, data.manilha);
+            let maior = forcaCarta(data.mesa[0].real || data.mesa[0].carta, data.manilha);
             let vencedores = [data.mesa[0]];
             for (let i = 1; i < data.mesa.length; i++) {
-              const atual = forcaCarta(data.mesa[i].carta, data.manilha);
+              const cartaComparada = data.mesa[i].real || data.mesa[i].carta;
+              const atual = forcaCarta(cartaComparada, data.manilha);
               if (atual > maior) {
                 maior = atual;
                 vencedores = [data.mesa[i]];
@@ -547,6 +650,7 @@
               data.rodadas.push(time);
               data.ultimoVencedor = `${players[vencedor.jogador]?.nome || 'Jogador'} venceu a rodada`;
               data.turno = ids.indexOf(vencedor.jogador);
+              data.turnStartedAt = Date.now();
             }
 
             data.ultimaMesa = [...data.mesa];
@@ -564,9 +668,26 @@
 
           t.set(ref, data);
         });
+        cartaSelecionada = null;
       } catch (erro) {
         mostrarErro(erro.message || "Não foi possível jogar a carta.");
       }
+    }
+
+    async function jogarCartaSelecionada() {
+      if (!cartaSelecionada) {
+        mostrarErro("Selecione uma carta primeiro.");
+        return;
+      }
+      await jogarCartaInterna(cartaSelecionada, false);
+    }
+
+    async function encobrirCartaSelecionada() {
+      if (!cartaSelecionada) {
+        mostrarErro("Selecione uma carta primeiro.");
+        return;
+      }
+      await jogarCartaInterna(cartaSelecionada, true);
     }
 
     async function pedirTruco() {
@@ -578,6 +699,7 @@
           const players = data.players || {};
           const ids = idsOrdenados(players);
           if (!data.gameStarted) throw new Error("A partida ainda não começou.");
+          if (data.partidaEncerrada) throw new Error("A partida já acabou.");
           if (data.trucoPendente) throw new Error("Já existe um truco pendente.");
           if (ids[data.turno] !== jogadorId) throw new Error("Só quem está na vez pode pedir.");
           if ((data.trucoValor || 1) >= 12) throw new Error("A mão já está valendo 12.");
@@ -602,8 +724,13 @@
           const doc = await t.get(ref);
           const data = doc.data() || {};
           const players = data.players || {};
+          const ids = idsOrdenados(players);
           if (!data.trucoPendente) throw new Error("Não há truco pendente.");
           if (data.trucoPedidoPor === jogadorId) throw new Error("Quem pediu não pode aceitar.");
+          if (timeDoJogador(players, data.trucoPedidoPor) === timeDoJogador(players, jogadorId)) throw new Error("Só o adversário pode aceitar o truco.");
+          if (ids[data.turno] === jogadorId) {
+            // permitido, mas não obrigatório estar na vez
+          }
 
           data.trucoValor = data.trucoProposto || data.trucoValor || 1;
           data.trucoAceitoPor = jogadorId;
@@ -628,6 +755,7 @@
           const players = data.players || {};
           if (!data.trucoPendente) throw new Error("Não há truco pendente.");
           if (data.trucoPedidoPor === jogadorId) throw new Error("Quem pediu não pode correr.");
+          if (timeDoJogador(players, data.trucoPedidoPor) === timeDoJogador(players, jogadorId)) throw new Error("Só o adversário pode correr.");
 
           const timePediu = timeDoJogador(players, data.trucoPedidoPor);
           if (!data.pontos) data.pontos = { A: 0, B: 0 };
@@ -650,6 +778,8 @@
       const nomeTurno = players[ids[data.turno]]?.nome || "-";
       const minhaVez = ids[data.turno] === jogadorId;
       const pedidoPorOutro = data.trucoPendente && data.trucoPedidoPor !== jogadorId;
+      const podeResponder = pedidoPorOutro && timeDoJogador(players, data.trucoPedidoPor) !== timeDoJogador(players, jogadorId);
+      const encerrada = fimDePartida(data) || data.partidaEncerrada;
 
       document.getElementById("placar").textContent = placarComNomes(players, data.pontos);
       document.getElementById("turnoInfo").textContent = minhaVez
@@ -660,6 +790,16 @@
       document.getElementById("statusJogo").textContent = data.ultimoVencedor || "Jogo em andamento";
       document.getElementById("viraCarta").textContent = data.vira || "?";
       document.getElementById("manilhaInfo").textContent = `Manilha: ${data.manilha || '-'}`;
+      document.getElementById("timerInfo").textContent = `Tempo: ${tempoRestante(data)}s`;
+
+      const fimEl = document.getElementById("fimPartida");
+      if (encerrada) {
+        fimEl.style.display = "block";
+        fimEl.textContent = `🏆 Partida encerrada — vencedor: ${data.vencedorFinal || ((data.pontos?.A || 0) >= 12 ? nomeDoTime(players, 'A') : nomeDoTime(players, 'B'))}`;
+      } else {
+        fimEl.style.display = "none";
+        fimEl.textContent = "";
+      }
 
       const resumo = document.getElementById("resumoRodadas");
       resumo.innerHTML = "";
@@ -683,7 +823,7 @@
           nomeJogador.className = "carta-nome";
           nomeJogador.textContent = players[item.jogador]?.nome || "Jogador";
           const carta = document.createElement("div");
-          carta.className = "carta usada";
+          carta.className = item.encoberta ? "carta usada encoberta" : "carta usada";
           carta.textContent = item.carta;
           wrap.appendChild(nomeJogador);
           wrap.appendChild(carta);
@@ -695,18 +835,21 @@
       maoDiv.innerHTML = "";
       mao.forEach(c => {
         const carta = document.createElement("div");
-        carta.className = "carta";
+        carta.className = "carta" + (cartaSelecionada === c ? " selecionada" : "");
         carta.textContent = c;
-        if (data.trucoPendente || !minhaVez) {
+        if (data.trucoPendente || !minhaVez || encerrada) {
           carta.classList.add("usada");
         } else {
-          carta.addEventListener("click", () => jogarCarta(c));
+          carta.addEventListener("click", () => {
+            cartaSelecionada = (cartaSelecionada === c) ? null : c;
+            renderJogo(data);
+          });
         }
         maoDiv.appendChild(carta);
       });
 
-      document.getElementById("btnAceitar").style.display = pedidoPorOutro ? "inline-block" : "none";
-      document.getElementById("btnCorrer").style.display = pedidoPorOutro ? "inline-block" : "none";
+      document.getElementById("btnAceitar").style.display = podeResponder ? "inline-block" : "none";
+      document.getElementById("btnCorrer").style.display = podeResponder ? "inline-block" : "none";
 
       const btnTruco = document.getElementById("btnTruco");
       const podeAumentar = podePedirAumento(data);
@@ -716,7 +859,12 @@
       if ((data.trucoValor || 1) === 9) nomeBotao = "Pedir 12";
       if ((data.trucoValor || 1) >= 12) nomeBotao = "Máximo 12";
       btnTruco.textContent = nomeBotao;
-      btnTruco.disabled = !!data.trucoPendente || (data.trucoValor || 1) >= 12 || !minhaVez || !podeAumentar;
+      btnTruco.disabled = !!data.trucoPendente || (data.trucoValor || 1) >= 12 || !minhaVez || !podeAumentar || encerrada;
+
+      document.getElementById("btnJogarSelecionada").disabled = !cartaSelecionada || !minhaVez || !!data.trucoPendente || encerrada;
+      document.getElementById("btnEncobrir").disabled = !cartaSelecionada || !minhaVez || !!data.trucoPendente || encerrada;
+      document.getElementById("btnAceitar").disabled = !podeResponder || encerrada;
+      document.getElementById("btnCorrer").disabled = !podeResponder || encerrada;
     }
 
     function ouvirSala() {
@@ -781,6 +929,8 @@
     document.getElementById("btnTruco").addEventListener("click", pedirTruco);
     document.getElementById("btnAceitar").addEventListener("click", aceitarTruco);
     document.getElementById("btnCorrer").addEventListener("click", correrTruco);
+    document.getElementById("btnJogarSelecionada").addEventListener("click", jogarCartaSelecionada);
+    document.getElementById("btnEncobrir").addEventListener("click", encobrirCartaSelecionada);
   </script>
 </body>
 </html>
