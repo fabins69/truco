@@ -95,6 +95,12 @@
       <p class="info" id="status">Aguardando jogadores...</p>
     </div>
 
+    <div id="jogo" class="box" style="display:none">
+      <h2>🎮 Partida iniciada</h2>
+      <p id="infoJogo">A partida começou.</p>
+      <div id="mesaJogo"></div>
+    </div>
+
     <div id="debug" class="box" style="display:none"></div>
   </div>
 
@@ -253,6 +259,10 @@
           } else {
             status.textContent = "JOGO INICIADO!";
             status.className = "info success";
+            document.getElementById("espera").style.display = "none";
+            document.getElementById("jogo").style.display = "block";
+            document.getElementById("infoJogo").textContent = `Modo ${data.modo || "1x1"} iniciado com ${total} jogador(es).`;
+            document.getElementById("mesaJogo").innerHTML = `<p>✅ Agora a tela do jogo abriu corretamente.</p>`;
           }
         } catch (erro) {
           mostrarErro(erro.message || "Erro ao atualizar sala.");
