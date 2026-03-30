@@ -1,1215 +1,454 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Truco Online Campeonato</title>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <style>
-    :root {
-      --bg-dark: #09141c;
-      --wood1: #7c5a3a;
-      --wood2: #4e3521;
-      --felt1: #176d22;
-      --felt2: #0f5018;
-      --card-back: #ff756d;
-      --card-back-2: #ff9a92;
-      --text: #ffffff;
-      --muted: rgba(255,255,255,0.82);
-      --accent: #ff9800;
-      --accent-2: #ffb74d;
-      --blue: #1e88e5;
-      --green: #34c759;
-      --danger: #e53935;
-      --secondary: #607d8b;
-      --panel: rgba(0,0,0,0.42);
-      --panel-soft: rgba(255,255,255,0.10);
-      --shadow: 0 10px 28px rgba(0,0,0,.32);
+    :root{
+      --bg:#10293a;
+      --wood1:#8c6541;
+      --wood2:#5d3f26;
+      --felt1:#13721e;
+      --felt2:#0b5415;
+      --panel:rgba(0,0,0,.38);
+      --panel2:rgba(255,255,255,.1);
+      --text:#fff;
+      --accent:#ff9f0a;
+      --blue:#1683d9;
+      --green:#2dbd5a;
+      --danger:#e54343;
     }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: radial-gradient(circle at top, #173245, var(--bg-dark));
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 18px 14px 30px;
-    }
-
-    h1 {
-      text-align: center;
-      margin: 6px 0 16px;
-      letter-spacing: .4px;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-
-    input, select {
-      padding: 12px;
-      border: none;
-      border-radius: 12px;
-      min-width: 160px;
-      font-size: 16px;
-      background: #fff;
-      color: #111;
-    }
-
-    button {
-      padding: 12px 18px;
-      border: none;
-      border-radius: 14px;
-      background: var(--accent);
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-    }
-
-    button:hover { opacity: 0.94; }
-    button:disabled { opacity: 0.45; cursor: not-allowed; }
-    .secondary { background: var(--secondary); }
-    .danger { background: var(--danger); }
-    .success-btn { background: var(--green); }
-    .blue-btn { background: var(--blue); }
-
-    .box {
-      max-width: 980px;
-      margin: 16px auto;
-      background: rgba(255,255,255,0.07);
-      border-radius: 18px;
-      padding: 18px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(6px);
-    }
-
-    .error { color: #ff9e9e; text-align: center; font-weight: bold; min-height: 22px; }
-    .info { text-align: center; }
-
-    ul { list-style: none; padding: 0; margin: 14px 0; }
-    li {
-      background: rgba(255,255,255,0.09);
-      margin: 8px 0;
-      padding: 10px;
-      border-radius: 12px;
-    }
-
-    .game-layout {
-      display: grid;
-      grid-template-columns: 240px 1fr;
-      gap: 18px;
-      align-items: start;
-    }
-
-    .side-panel {
-      background: var(--panel);
-      border-radius: 18px;
-      padding: 14px;
-      box-shadow: var(--shadow);
-    }
-
-    .side-block {
-      background: rgba(255,255,255,0.08);
-      border-radius: 14px;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    .side-title {
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: .6px;
-      opacity: .9;
-      margin-bottom: 8px;
-    }
-
-    .placar {
-      line-height: 1.8;
-      font-weight: bold;
-      font-size: 17px;
-    }
-
-    .table-shell {
-      background: linear-gradient(135deg, var(--wood1), var(--wood2));
-      border-radius: 30px;
-      padding: 16px;
-      box-shadow: inset 0 2px 0 rgba(255,255,255,.15), var(--shadow);
-    }
-
-    .table-felt {
-      position: relative;
-      min-height: 720px;
-      border-radius: 24px;
-      background:
-        radial-gradient(circle at center, #1a7a26 0%, var(--felt1) 40%, var(--felt2) 100%);
-      box-shadow: inset 0 0 0 4px rgba(255,255,255,0.08), inset 0 0 40px rgba(0,0,0,.25);
-      overflow: hidden;
-    }
-
-    .table-header {
-      position: absolute;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,.35);
-      padding: 10px 14px;
-      border-radius: 999px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      z-index: 2;
-    }
-
-    .badge {
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.14);
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    .player-seat {
-      position: absolute;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      z-index: 2;
-    }
-
-    .seat-top { top: 180px; left: 50%; transform: translateX(-50%); }
-    .seat-left { left: 18px; top: 50%; transform: translateY(-50%); }
-    .seat-right { right: 18px; top: 50%; transform: translateY(-50%); }
-    .seat-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); }
-
-    .player-avatar {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #7c4dff, #00bcd4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      box-shadow: 0 6px 18px rgba(0,0,0,.28);
-      border: 3px solid rgba(255,255,255,.6);
-    }
-
-    .player-name {
-      background: rgba(0,0,0,.35);
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 13px;
-      max-width: 130px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .player-hand-preview {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      flex-wrap: nowrap;
-    }
-
-    .mini-card {
-      width: 38px;
-      height: 54px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, var(--card-back), var(--card-back-2));
-      border: 2px solid rgba(255,255,255,.6);
-      box-shadow: 0 4px 10px rgba(0,0,0,.22);
-      color: rgba(255,255,255,.88);
-      font-size: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .mini-card.empty {
-      opacity: .18;
-    }
-
-    .center-zone {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-    }
-
-    .center-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-      pointer-events: auto;
-    }
-
-    .center-vira {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(0,0,0,.28);
-      padding: 10px 14px;
-      border-radius: 18px;
-    }
-
-    .mesa-cartas {
-      display: flex;
-      justify-content: center;
-      gap: 22px;
-      flex-wrap: wrap;
-      min-height: 180px;
-      align-items: center;
-    }
-
-    .carta-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .carta-nome {
-      font-size: 14px;
-      opacity: 0.95;
-      background: rgba(0,0,0,.26);
-      padding: 6px 10px;
-      border-radius: 999px;
-    }
-
-    .carta {
-      width: 92px;
-      height: 132px;
-      background: white;
-      color: black;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.28);
-      transition: transform 0.15s, outline 0.15s;
-      user-select: none;
-    }
-
-    .carta:hover { transform: translateY(-6px); }
-    .carta.usada { opacity: 0.45; cursor: not-allowed; }
-    .carta.selecionada {
-      outline: 4px solid var(--accent-2);
-      transform: translateY(-10px);
-    }
-
-    .carta.encoberta {
-      background: linear-gradient(135deg, #1d3557, #0d1b2a);
-      color: #d0e6ff;
-      border: 2px solid rgba(255,255,255,0.12);
-    }
-
-    .bottom-panel {
-      position: absolute;
-      left: 50%;
-      bottom: 16px;
-      transform: translateX(-50%);
-      width: min(92%, 900px);
-      background: rgba(0,0,0,.35);
-      border-radius: 22px;
-      padding: 14px;
-      z-index: 3;
-    }
-
-    .status-line {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-      color: var(--muted);
-      font-size: 15px;
-    }
-
-    .mao-cartas, .linha-botoes, .linha-acoes, .resumo-rodadas {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    .timer {
-      font-size: 18px;
-      font-weight: bold;
-      color: var(--warning);
-    }
-
-    .fim {
-      font-size: 22px;
-      font-weight: bold;
-      color: var(--success);
-      margin-top: 14px;
-      text-align: center;
-    }
-
-    @media (max-width: 980px) {
-      .game-layout { grid-template-columns: 1fr; }
-      .table-felt { min-height: 820px; }
-      .side-panel { order: 2; }
-    }
-
-    @media (max-width: 760px) {
-      .table-felt { min-height: 920px; }
-      .seat-left { left: 8px; }
-      .seat-right { right: 8px; }
-      .player-avatar { width: 54px; height: 54px; font-size: 24px; }
-      .carta { width: 82px; height: 118px; font-size: 22px; }
-    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#18374d,var(--bg));color:var(--text)}
+    .container{max-width:1280px;margin:0 auto;padding:18px 14px 28px}
+    h1{text-align:center;margin:8px 0 18px}
+    .topbar{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    input,select{padding:12px;border:none;border-radius:12px;min-width:160px;font-size:16px}
+    button{padding:12px 18px;border:none;border-radius:14px;background:var(--accent);color:#fff;font-size:16px;font-weight:bold;cursor:pointer}
+    button:disabled{opacity:.45;cursor:not-allowed}
+    .secondary{background:#5f7584}.danger{background:var(--danger)}.blue{background:var(--blue)}.green{background:var(--green)}
+    .error{text-align:center;color:#ff9f9f;font-weight:bold;min-height:24px}
+    .box{background:rgba(255,255,255,.06);border-radius:18px;padding:18px;max-width:980px;margin:16px auto}
+    .game-layout{display:grid;grid-template-columns:250px 1fr;gap:16px}
+    .side{background:rgba(0,0,0,.35);border-radius:18px;padding:14px}
+    .side-block{background:rgba(255,255,255,.08);border-radius:14px;padding:12px;margin-bottom:12px}
+    .side-title{font-size:14px;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;opacity:.9}
+    .placar{line-height:1.7;font-weight:bold}
+    .table-shell{background:linear-gradient(135deg,var(--wood1),var(--wood2));border-radius:30px;padding:16px}
+    .table{position:relative;min-height:760px;border-radius:24px;background:radial-gradient(circle at center,#168523 0%,var(--felt1) 42%,var(--felt2) 100%);box-shadow:inset 0 0 0 4px rgba(255,255,255,.08)}
+    .center-vira{position:absolute;top:26px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;background:rgba(0,0,0,.28);padding:12px 16px;border-radius:24px;z-index:5}
+    .badge{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.13);font-weight:bold;font-size:14px}
+    .seat{position:absolute;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:4}
+    .top-seat{top:150px;left:50%;transform:translateX(-50%)}
+    .left-seat{left:30px;top:50%;transform:translateY(-50%)}
+    .right-seat{right:30px;top:50%;transform:translateY(-50%)}
+    .bottom-seat{bottom:188px;left:50%;transform:translateX(-50%)}
+    .avatar{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#7f5cff,#35c8ff);display:flex;align-items:center;justify-content:center;font-size:28px;border:3px solid rgba(255,255,255,.65)}
+    .name{background:rgba(0,0,0,.35);padding:6px 10px;border-radius:999px;font-size:13px;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .preview{display:flex;gap:5px}
+    .mini{width:34px;height:48px;border-radius:8px;background:linear-gradient(135deg,#ff7f76,#ffa49b);border:2px solid rgba(255,255,255,.6)}
+    .mini.empty{opacity:.15}
+    .played{position:absolute;z-index:3;min-width:84px;display:flex;flex-direction:column;align-items:center;gap:6px}
+    .played.top{top:270px;left:50%;transform:translateX(-50%)}
+    .played.left{left:118px;top:50%;transform:translateY(-50%)}
+    .played.right{right:118px;top:50%;transform:translateY(-50%)}
+    .played.bottom{bottom:270px;left:50%;transform:translateX(-50%)}
+    .card-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+    .card-name{background:rgba(0,0,0,.28);padding:5px 9px;border-radius:999px;font-size:13px}
+    .card{width:74px;height:108px;background:#fff;color:#111;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;box-shadow:0 8px 18px rgba(0,0,0,.28);user-select:none}
+    .card.small{width:68px;height:98px;font-size:18px}
+    .card.back{background:linear-gradient(135deg,#1d3557,#0d1b2a);color:#d0e6ff}
+    .bottom-panel{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:min(94%,860px);background:rgba(0,0,0,.34);border-radius:24px;padding:14px;z-index:5}
+    .status-line,.row,.rounds{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+    .hand{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+    .selectable{cursor:pointer;transition:transform .14s,outline .14s}
+    .selectable:hover{transform:translateY(-6px)}
+    .selected{outline:4px solid #ffd166;transform:translateY(-8px)}
+    .disabled{opacity:.45;cursor:not-allowed}
+    .timer{font-size:18px;font-weight:bold;color:#ffd166}
+    .round-badge{padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.12);font-weight:bold}
+    .finish{font-size:22px;font-weight:bold;color:#7dff94;text-align:center;margin-top:10px}
+    #debug{white-space:pre-wrap;font-size:13px;opacity:.9}
+    @media (max-width:980px){.game-layout{grid-template-columns:1fr}.table{min-height:860px}}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🃏 Truco Online Campeonato</h1>
+<div class="container">
+  <h1>🃏 Truco Online Campeonato</h1>
 
-    <div class="topbar">
-      <input id="nome" placeholder="Seu nome">
-      <input id="sala" placeholder="Código da sala">
-      <select id="modo">
-        <option value="1x1">1x1</option>
-        <option value="2x2">2x2</option>
-      </select>
-      <button id="btnEntrar" type="button">Entrar</button>
-    </div>
-
-    <div id="erro" class="error"></div>
-
-    <div id="espera" class="box" style="display:none">
-      <h2>👥 Sala de espera</h2>
-      <div class="info" id="modoSala"></div>
-      <ul id="lista"></ul>
-      <button id="btnPronto" type="button">Estou pronto ✅</button>
-      <p class="info" id="status">Aguardando jogadores...</p>
-    </div>
-
-    <div id="jogo" style="display:none">
-      <div class="game-layout">
-        <aside class="side-panel">
-          <div class="side-block">
-            <div class="side-title">Placar</div>
-            <div class="placar" id="placar">Placar</div>
-          </div>
-          <div class="side-block">
-            <div class="side-title">Informações</div>
-            <div class="info" id="turnoInfo">Turno:</div>
-            <div class="info" id="rodadaInfo">Rodada: 1</div>
-            <div class="info" id="trucoInfo">Mão valendo: 1</div>
-            <div class="timer" id="timerInfo">Tempo: --</div>
-          </div>
-          <div class="side-block">
-            <div class="side-title">Rodadas da mão</div>
-            <div class="resumo-rodadas" id="resumoRodadas"></div>
-          </div>
-          <div class="side-block">
-            <div class="side-title">Status</div>
-            <div class="info" id="statusJogo">A partida começou.</div>
-            <div id="fimPartida" class="fim" style="display:none"></div>
-          </div>
-        </aside>
-
-        <main class="table-shell">
-          <div class="table-felt">
-            <div class="table-header">
-              <div class="badge">🪄 Vira</div>
-              <div class="carta usada" id="viraCarta">?</div>
-              <div class="badge" id="manilhaInfo">Manilha: -</div>
-            </div>
-
-            <div class="player-seat seat-top" id="seatTopo">
-              <div class="player-avatar">🙂</div>
-              <div class="player-name" id="nomeTopo">Aguardando</div>
-              <div class="player-hand-preview" id="maoTopo"></div>
-            </div>
-
-            <div class="player-seat seat-left" id="seatEsquerda">
-              <div class="player-avatar">😎</div>
-              <div class="player-name" id="nomeEsquerda">Aguardando</div>
-              <div class="player-hand-preview" id="maoEsquerda"></div>
-            </div>
-
-            <div class="player-seat seat-right" id="seatDireita">
-              <div class="player-avatar">🤖</div>
-              <div class="player-name" id="nomeDireita">Aguardando</div>
-              <div class="player-hand-preview" id="maoDireita"></div>
-            </div>
-
-            <div class="center-zone">
-              <div class="center-content">
-                <div class="mesa-cartas" id="mesaCartas"></div>
-              </div>
-            </div>
-
-            <div id="cartaJogadaTopo" style="position:absolute; top:315px; left:50%; transform:translateX(-50%); z-index:2;"></div>
-            <div id="cartaJogadaEsquerda" style="position:absolute; left:150px; top:50%; transform:translateY(-50%); z-index:2;"></div>
-            <div id="cartaJogadaDireita" style="position:absolute; right:150px; top:50%; transform:translateY(-50%); z-index:2;"></div>
-            <div id="cartaJogadaBaixo" style="position:absolute; bottom:215px; left:50%; transform:translateX(-50%); z-index:2;"></div>
-
-            <div class="bottom-panel">
-              <div class="status-line">
-                <span>Seu lugar: <strong id="posicaoInfo">baixo</strong></span>
-                <span>Seu time: <strong id="timeInfo">A</strong></span>
-              </div>
-
-              <div class="mao-cartas" id="maoCartas"></div>
-
-              <div class="linha-acoes">
-                <button id="btnJogarSelecionada" type="button" class="blue-btn">Jogar selecionada</button>
-                <button id="btnEncobrir" type="button" class="secondary">Encobrir</button>
-              </div>
-
-              <div class="linha-botoes">
-                <button id="btnTruco" type="button">Pedir Truco</button>
-                <button id="btnAceitar" type="button" class="success-btn">Aceitar</button>
-                <button id="btnCorrer" type="button" class="danger">Correr</button>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-    </div>
-
-    <div id="debug" class="box" style="display:none"></div>
+  <div class="topbar">
+    <input id="nome" placeholder="Seu nome">
+    <input id="sala" placeholder="Código da sala">
+    <select id="modo">
+      <option value="1x1">1x1</option>
+      <option value="2x2">2x2</option>
+    </select>
+    <button id="btnEntrar" type="button">Entrar</button>
   </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyD4YnuGHnyAKtQERG1ojY8Nie00dMDoOAc",
-      authDomain: "truco-online-eaab3.firebaseapp.com",
-      projectId: "truco-online-eaab3",
-      storageBucket: "truco-online-eaab3.firebasestorage.app",
-      messagingSenderId: "549011297387",
-      appId: "1:549011297387:web:e6490bc55684742e3dcd2e"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    const BARALHO = [
-      "4♠","5♠","6♠","7♠","Q♠","J♠","K♠","A♠","2♠","3♠",
-      "4♥","5♥","6♥","7♥","Q♥","J♥","K♥","A♥","2♥","3♥",
-      "4♦","5♦","6♦","7♦","Q♦","J♦","K♦","A♦","2♦","3♦",
-      "4♣","5♣","6♣","7♣","Q♣","J♣","K♣","A♣","2♣","3♣"
-    ];
-    const ORDEM = ["4","5","6","7","Q","J","K","A","2","3"];
-    const ORDEM_NAIPES = { "♣": 1, "♥": 2, "♠": 3, "♦": 4 };
-    const TEMPO_JOGADA = 20;
-
-    let salaId = "";
-    let nome = "";
-    let salaListener = null;
-    let cartaSelecionada = null;
-
-    let jogadorId = sessionStorage.getItem("truco_jogador_id");
-    if (!jogadorId) {
-      jogadorId = Math.random().toString(36).substring(2, 10);
-      sessionStorage.setItem("truco_jogador_id", jogadorId);
-    }
-
-    function mostrarErro(msg) {
-      document.getElementById("erro").textContent = msg || "";
-      if (msg) console.error(msg);
-    }
-
-    function debug(msg) {
-      const box = document.getElementById("debug");
-      box.style.display = "block";
-      box.textContent = String(msg);
-    }
-
-    function embaralhar(lista) {
-      const a = [...lista];
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
-
-    function idsOrdenados(players) {
-      return Object.keys(players || {}).sort();
-    }
-
-    function valorFace(carta) { return carta.slice(0, -1); }
-    function naipeCarta(carta) { return carta.slice(-1); }
-
-    function definirManilha(vira) {
-      const face = valorFace(vira);
-      const idx = ORDEM.indexOf(face);
-      return ORDEM[(idx + 1) % ORDEM.length];
-    }
-
-    function forcaCarta(carta, manilha) {
-      if (carta === "🂠") return -1;
-      const face = valorFace(carta);
-      const naipe = naipeCarta(carta);
-      if (face === manilha) return 100 + (ORDEM_NAIPES[naipe] || 0);
-      return ORDEM.indexOf(face);
-    }
-
-    function timeDoJogador(players, id) {
-      const ids = idsOrdenados(players);
-      const idx = ids.indexOf(id);
-      return idx % 2 === 0 ? "A" : "B";
-    }
-
-    function proximoValorTruco(atual) {
-      if (atual === 1) return 3;
-      if (atual === 3) return 6;
-      if (atual === 6) return 9;
-      if (atual === 9) return 12;
-      return 12;
-    }
-
-    function podePedirAumento(data) {
-      const ultimoValor = data.trucoValor || 1;
-      const ultimoAceitou = data.trucoAceitoPor || "";
-      const ultimoPediu = data.trucoPedidoPorUltimo || "";
-      if (ultimoValor === 1) return true;
-      if (!ultimoAceitou) return false;
-      return jogadorId === ultimoAceitou && jogadorId !== ultimoPediu;
-    }
-
-    function nomeDoTime(players, time) {
-      const ids = idsOrdenados(players);
-      const nomes = ids
-        .filter((id, idx) => (idx % 2 === 0 ? "A" : "B") === time)
-        .map(id => players[id]?.nome || "Jogador");
-      return nomes.join(" / ") || `Time ${time}`;
-    }
-
-    function placarComNomes(players, pontos) {
-      return `${nomeDoTime(players, "A")}: ${pontos?.A || 0} × ${pontos?.B || 0} :${nomeDoTime(players, "B")}`;
-    }
-
-    function decidirVencedorDaMao(rodadas, maoInicialTime = "A") {
-      if (!rodadas || rodadas.length === 0) return null;
-      const r1 = rodadas[0];
-      const r2 = rodadas[1];
-      const r3 = rodadas[2];
-      if (rodadas.length === 1) return null;
-      if (r1 === "E") {
-        if (rodadas.length === 2) return r2 && r2 !== "E" ? r2 : null;
-        if (r2 === "E" && r3 === "E") return maoInicialTime;
-        if (r2 === "E") return r3 && r3 !== "E" ? r3 : maoInicialTime;
-        return r2;
-      }
-      if (r2 === "E") return r1;
-      if (r1 === r2) return r1;
-      if (rodadas.length < 3) return null;
-      if (r3 === "E") return r1;
-      return r3 || null;
-    }
-
-    function tempoRestante(data) {
-      if (!data.turnStartedAt) return TEMPO_JOGADA;
-      const inicio = data.turnStartedAt.toMillis ? data.turnStartedAt.toMillis() : data.turnStartedAt;
-      const agora = Date.now();
-      const passou = Math.floor((agora - inicio) / 1000);
-      return Math.max(0, TEMPO_JOGADA - passou);
-    }
-
-    function fimDePartida(data) {
-      return (data.pontos?.A || 0) >= 12 || (data.pontos?.B || 0) >= 12;
-    }
-
-    function seatsParaJogadores(players) {
-      const ids = idsOrdenados(players);
-      const meuIndex = ids.indexOf(jogadorId);
-      const result = { top: null, left: null, right: null, bottom: null };
-      if (meuIndex === -1) return result;
-      result.bottom = ids[meuIndex];
-      if (ids.length === 2) result.top = ids[(meuIndex + 1) % 2];
-      if (ids.length === 4) {
-        result.top = ids[(meuIndex + 2) % 4];
-        result.left = ids[(meuIndex + 3) % 4];
-        result.right = ids[(meuIndex + 1) % 4];
-      }
-      return result;
-    }
-
-    function renderMiniHand(elId, count) {
-      const el = document.getElementById(elId);
-      el.innerHTML = "";
-      for (let i = 0; i < 3; i++) {
-        const c = document.createElement("div");
-        c.className = "mini-card" + (i >= count ? " empty" : "");
-        c.textContent = i < count ? "🂠" : "";
-        el.appendChild(c);
-      }
-    }
-
-    async function entrar() {
-      try {
-        mostrarErro("");
-        nome = document.getElementById("nome").value.trim();
-        salaId = document.getElementById("sala").value.trim();
-        const modoSelecionado = document.getElementById("modo").value;
-        if (!nome || !salaId) {
-          mostrarErro("Preencha nome e código da sala.");
-          return;
-        }
-
-        const ref = db.collection("salas").doc(salaId);
-        const snap = await ref.get();
-
-        if (!snap.exists) {
-          await ref.set({
-            players: {},
-            prontos: {},
-            gameStarted: false,
-            modo: modoSelecionado,
-            limiteJogadores: modoSelecionado === "1x1" ? 2 : 4,
-            criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-            hands: {},
-            mesa: [],
-            ultimaMesa: [],
-            turno: 0,
-            pontos: { A: 0, B: 0 },
-            trucoValor: 1,
-            trucoPedidoPorUltimo: "",
-            trucoAceitoPor: "",
-            rodada: 1,
-            rodadas: [],
-            vira: "",
-            manilha: "",
-            trucoPendente: false,
-            trucoPedidoPor: "",
-            trucoProposto: null,
-            maoInicialTime: "A",
-            ultimoVencedor: "",
-            turnStartedAt: null,
-            partidaEncerrada: false,
-            vencedorFinal: ""
-          });
-        }
-
-        await db.runTransaction(async (t) => {
-          const doc = await t.get(ref);
-          const data = doc.data() || {};
-          if (!data.players) data.players = {};
-          if (!data.prontos) data.prontos = {};
-          if (!data.hands) data.hands = {};
-          if (!data.mesa) data.mesa = [];
-          if (!data.ultimaMesa) data.ultimaMesa = [];
-          if (!data.modo) data.modo = modoSelecionado;
-          if (!data.limiteJogadores) data.limiteJogadores = data.modo === "1x1" ? 2 : 4;
-          if (!data.pontos) data.pontos = { A: 0, B: 0 };
-          if (data.turno === undefined) data.turno = 0;
-          if (!data.rodadas) data.rodadas = [];
-          if (!data.trucoValor) data.trucoValor = 1;
-          if (!data.trucoPedidoPorUltimo) data.trucoPedidoPorUltimo = "";
-          if (!data.trucoAceitoPor) data.trucoAceitoPor = "";
-          if (!data.rodada) data.rodada = 1;
-          if (!data.vira) data.vira = "";
-          if (!data.manilha) data.manilha = "";
-          if (data.trucoPendente === undefined) data.trucoPendente = false;
-          if (!data.trucoPedidoPor) data.trucoPedidoPor = "";
-          if (data.trucoProposto === undefined) data.trucoProposto = null;
-          if (!data.maoInicialTime) data.maoInicialTime = "A";
-          if (!data.ultimoVencedor) data.ultimoVencedor = "";
-          if (data.partidaEncerrada === undefined) data.partidaEncerrada = false;
-          if (!data.vencedorFinal) data.vencedorFinal = "";
-
-          const totalJogadores = Object.keys(data.players).length;
-          const jaEstaNaSala = !!data.players[jogadorId];
-          if (!jaEstaNaSala && totalJogadores >= data.limiteJogadores) throw new Error("Sala cheia para esse modo.");
-
-          data.players[jogadorId] = { nome };
-          if (data.prontos[jogadorId] === undefined) data.prontos[jogadorId] = false;
-          t.set(ref, data);
-        });
-
-        document.getElementById("espera").style.display = "block";
-        ouvirSala();
-        debug(`Entrou na sala ${salaId} como ${nome} (${jogadorId})`);
-      } catch (erro) {
-        mostrarErro(erro.message || "Não foi possível entrar.");
-      }
-    }
-
-    async function ficarPronto() {
-      try {
-        if (!salaId) {
-          mostrarErro("Entre em uma sala primeiro.");
-          return;
-        }
-        const ref = db.collection("salas").doc(salaId);
-        await db.runTransaction(async (t) => {
-          const doc = await t.get(ref);
-          const data = doc.data() || {};
-          if (!data.prontos) data.prontos = {};
-          data.prontos[jogadorId] = true;
-          t.update(ref, { prontos: data.prontos });
-        });
-      } catch (erro) {
-        mostrarErro(erro.message || "Não foi possível marcar pronto.");
-      }
-    }
-
-    async function iniciarPartidaSeNecessario(data) {
-      const ref = db.collection("salas").doc(salaId);
-      const limite = data.limiteJogadores || 2;
-      const total = Object.keys(data.players || {}).length;
-      const totalProntos = Object.values(data.prontos || {}).filter(Boolean).length;
-      if (total === limite && totalProntos === limite && !data.gameStarted) {
-        await db.runTransaction(async (t) => {
-          const doc = await t.get(ref);
-          const d = doc.data() || {};
-          if (d.gameStarted) return;
-          const jogadores = idsOrdenados(d.players || {});
-          const deck = embaralhar(BARALHO);
-          const hands = {};
-          for (let i = 0; i < jogadores.length; i++) hands[jogadores[i]] = deck.splice(0, 3);
-          const vira = deck.pop();
-          const manilha = definirManilha(vira);
-          t.update(ref, {
-            gameStarted: true,
-            hands,
-            mesa: [],
-            ultimaMesa: [],
-            turno: 0,
-            pontos: d.pontos || { A: 0, B: 0 },
-            trucoValor: 1,
-            trucoPedidoPorUltimo: "",
-            trucoAceitoPor: "",
-            rodada: 1,
-            rodadas: [],
-            ultimoVencedor: "",
-            vira,
-            manilha,
-            trucoPendente: false,
-            trucoPedidoPor: "",
-            trucoProposto: null,
-            maoInicialTime: "A",
-            turnStartedAt: firebase.firestore.FieldValue.serverTimestamp(),
-            partidaEncerrada: false,
-            vencedorFinal: ""
-          });
-        });
-      }
-    }
-
-    function prepararNovaMao(data, vencedorTime = null) {
-      const players = data.players || {};
-      const ids = idsOrdenados(players);
-      const novoDeck = embaralhar(BARALHO);
-      const novasHands = {};
-      for (let i = 0; i < ids.length; i++) novasHands[ids[i]] = novoDeck.splice(0, 3);
-      const vira = novoDeck.pop();
-      const manilha = definirManilha(vira);
-      data.hands = novasHands;
-      data.mesa = [];
-      data.ultimaMesa = [];
-      data.turno = 0;
-      data.trucoValor = 1;
-      data.trucoPedidoPorUltimo = "";
-      data.trucoAceitoPor = "";
-      data.rodada = 1;
-      data.rodadas = [];
-      data.vira = vira;
-      data.manilha = manilha;
-      data.trucoPendente = false;
-      data.trucoPedidoPor = "";
-      data.trucoProposto = null;
-      data.maoInicialTime = vencedorTime || data.maoInicialTime || "A";
-      data.turnStartedAt = Date.now();
-      if (vencedorTime) data.ultimoVencedor = `${nomeDoTime(players, vencedorTime)} venceu a mão`;
-      if ((data.pontos?.A || 0) >= 12 || (data.pontos?.B || 0) >= 12) {
-        data.partidaEncerrada = true;
-        const vencedorFinal = (data.pontos?.A || 0) >= 12 ? "A" : "B";
-        data.vencedorFinal = nomeDoTime(players, vencedorFinal);
-      }
-    }
-
-    async function jogarCartaInterna(carta, encoberta = false) {
-      try {
-        const ref = db.collection("salas").doc(salaId);
-        await db.runTransaction(async (t) => {
-          const doc = await t.get(ref);
-          const data = doc.data() || {};
-          const players = data.players || {};
-          const ids = idsOrdenados(players);
-
-          if (!data.gameStarted) throw new Error("A partida ainda não começou.");
-          if (data.partidaEncerrada) throw new Error("A partida já acabou.");
-          if (data.trucoPendente) throw new Error("Responda ao truco antes de jogar.");
-          if (ids[data.turno] !== jogadorId) throw new Error("Não é sua vez.");
-          if (!data.hands || !data.hands[jogadorId]) throw new Error("Suas cartas não foram encontradas.");
-          if (!data.hands[jogadorId].includes(carta)) throw new Error("Carta inválida.");
-
-          data.hands[jogadorId] = data.hands[jogadorId].filter(c => c !== carta);
-          data.mesa = data.mesa || [];
-          data.mesa.push({ jogador: jogadorId, carta: encoberta ? "🂠" : carta, real: carta, encoberta: !!encoberta });
-          data.turno = (data.turno + 1) % ids.length;
-          data.turnStartedAt = Date.now();
-
-          const cartasNecessarias = data.modo === "1x1" ? 2 : 4;
-          if (data.mesa.length >= cartasNecessarias) {
-            let maior = forcaCarta(data.mesa[0].real || data.mesa[0].carta, data.manilha);
-            let vencedores = [data.mesa[0]];
-            for (let i = 1; i < data.mesa.length; i++) {
-              const cartaComparada = data.mesa[i].real || data.mesa[i].carta;
-              const atual = forcaCarta(cartaComparada, data.manilha);
-              if (atual > maior) {
-                maior = atual;
-                vencedores = [data.mesa[i]];
-              } else if (atual === maior) {
-                vencedores.push(data.mesa[i]);
-              }
-            }
-
-            const empate = vencedores.length > 1;
-            if (!data.rodadas) data.rodadas = [];
-
-            if (empate) {
-              data.rodadas.push("E");
-              data.ultimoVencedor = "Rodada empatou (canga)";
-            } else {
-              const vencedor = vencedores[0];
-              const time = timeDoJogador(players, vencedor.jogador);
-              data.rodadas.push(time);
-              data.ultimoVencedor = `${players[vencedor.jogador]?.nome || 'Jogador'} venceu a rodada`;
-              data.turno = ids.indexOf(vencedor.jogador);
-              data.turnStartedAt = Date.now();
-            }
-
-            data.ultimaMesa = [...data.mesa];
-            data.mesa = [];
-            data.rodada = (data.rodada || 1) + 1;
-
-            const vencedorMao = decidirVencedorDaMao(data.rodadas, data.maoInicialTime || "A");
-            if (vencedorMao) {
-              if (!data.pontos) data.pontos = { A: 0, B: 0 };
-              data.pontos[vencedorMao] = Math.min(12, (data.pontos[vencedorMao] || 0) + (data.trucoValor || 1));
-              data.ultimoVencedor = `${nomeDoTime(players, vencedorMao)} ganhou a mão`;
-              prepararNovaMao(data, vencedorMao);
-            }
-          }
-
-          t.set(ref, data);
-        });
-        cartaSelecionada = null;
-      } catch (erro) {
-        mostrarErro(erro.message || "Não foi possível jogar a carta.");
-      }
-    }
-
-    async function jogarCartaSelecionada() {
-      if (!cartaSelecionada) {
-        mostrarErro("Selecione uma carta primeiro.");
-        return;
-      }
-      await jogarCartaInterna(cartaSelecionada, false);
-    }
-
-    async function encobrirCartaSelecionada() {
-      if (!cartaSelecionada) {
-        mostrarErro("Selecione uma carta primeiro.");
-        return;
-      }
-      await jogarCartaInterna(cartaSelecionada, true);
-    }
-
-    async function pedirTruco() {
-      try {
-        const ref = db.collection("salas").doc(salaId);
-        await db.runTransaction(async (t) => {
-          const doc = await t.get(ref);
-          const data = doc.data() || {};
-          const players = data.players || {};
-          const ids = idsOrdenados(players);
-          if (!data.gameStarted) throw new Error("A partida ainda não começou.");
-          if (data.partidaEncerrada) throw new Error("A partida já acabou.");
-          if (data.trucoPendente) throw new Error("Já existe um truco pendente.");
-          if (ids[data.turno] !== jogadorId) throw new Error("Só quem está na vez pode pedir.");
-          if ((data.trucoValor || 1) >= 12) throw new Error("A mão já está valendo 12.");
-          if (!podePedirAumento(data)) throw new Error("Agora só quem aceitou a última aposta pode aumentar.");
-
-          const proximo = proximoValorTruco(data.trucoValor || 1);
-          data.trucoPendente = true;
-          data.trucoPedidoPor = jogadorId;
-          data.trucoProposto = proximo;
-          data.ultimoVencedor = `${players[jogadorId]?.nome || 'Jogador'} pediu ${proximo === 3 ? 'TRUCO' : proximo}`;
-          t.set(ref, data);
-        });
-      } catch (erro) {
-        mostrarErro(erro.message || "Não foi possível pedir truco.");
-      }
-    }
-
-    async function aceitarTruco() {
-      try {
-        const ref = db.collection("salas").doc(salaId);
-        await db.runTransaction(async (t) => {
-          const doc = await t.get(ref);
-          const data = doc.data() || {};
-          const players = data.players || {};
-          if (!data.trucoPendente) throw new Error("Não há truco pendente.");
-          if (data.trucoPedidoPor === jogadorId) throw new Error("Quem pediu não pode aceitar.");
-          if (timeDoJogador(players, data.trucoPedidoPor) === timeDoJogador(players, jogadorId)) throw new Error("Só o adversário pode aceitar o truco.");
-
-          data.trucoValor = data.trucoProposto || data.trucoValor || 1;
-          data.trucoAceitoPor = jogadorId;
-          data.trucoPedidoPorUltimo = data.trucoPedidoPor || "";
-          data.trucoPendente = false;
-          data.trucoPedidoPor = "";
-          data.trucoProposto = null;
-          data.ultimoVencedor = `${players[jogadorId]?.nome || 'Jogador'} aceitou. A mão agora vale ${data.trucoValor}.`;
-          t.set(ref, data);
-        });
-      } catch (erro) {
-        mostrarErro(erro.message || "Não foi possível aceitar.");
-      }
-    }
-
-    async function correrTruco() {
-      try {
-        const ref = db.collection("salas").doc(salaId);
-        await db.runTransaction(async (t) => {
-          const doc = await t.get(ref);
-          const data = doc.data() || {};
-          const players = data.players || {};
-          if (!data.trucoPendente) throw new Error("Não há truco pendente.");
-          if (data.trucoPedidoPor === jogadorId) throw new Error("Quem pediu não pode correr.");
-          if (timeDoJogador(players, data.trucoPedidoPor) === timeDoJogador(players, jogadorId)) throw new Error("Só o adversário pode correr.");
-
-          const timePediu = timeDoJogador(players, data.trucoPedidoPor);
-          if (!data.pontos) data.pontos = { A: 0, B: 0 };
-          data.pontos[timePediu] = Math.min(12, (data.pontos[timePediu] || 0) + (data.trucoValor || 1));
-          data.ultimoVencedor = `${players[jogadorId]?.nome || 'Jogador'} correu. ${nomeDoTime(players, timePediu)} ganhou a mão e pontuou.`;
-          prepararNovaMao(data, timePediu);
-          t.set(ref, data);
-        });
-      } catch (erro) {
-        mostrarErro(erro.message || "Não foi possível correr.");
-      }
-    }
-
-    function renderJogo(data) {
-      const players = data.players || {};
-      const ids = idsOrdenados(players);
-      const meuTime = timeDoJogador(players, jogadorId);
-      const mao = (data.hands && data.hands[jogadorId]) || [];
-      const mesa = (data.mesa && data.mesa.length > 0) ? data.mesa : (data.ultimaMesa || []);
-      const nomeTurno = players[ids[data.turno]]?.nome || "-";
-      const minhaVez = ids[data.turno] === jogadorId;
-      const pedidoPorOutro = data.trucoPendente && data.trucoPedidoPor !== jogadorId;
-      const podeResponder = pedidoPorOutro && timeDoJogador(players, data.trucoPedidoPor) !== timeDoJogador(players, jogadorId);
-      const encerrada = fimDePartida(data) || data.partidaEncerrada;
-
-      document.getElementById("placar").textContent = placarComNomes(players, data.pontos);
-      document.getElementById("turnoInfo").textContent = minhaVez ? `É sua vez` : `Vez de ${nomeTurno}`;
-      document.getElementById("rodadaInfo").textContent = `Rodada: ${data.rodada || 1}`;
-      document.getElementById("trucoInfo").textContent = `Mão valendo: ${data.trucoValor || 1}`;
-      document.getElementById("statusJogo").textContent = data.ultimoVencedor || "Jogo em andamento";
-      document.getElementById("viraCarta").textContent = data.vira || "?";
-      document.getElementById("viraCarta").style.color = "#111";
-      document.getElementById("viraCarta").style.background = "#fff";
-      document.getElementById("manilhaInfo").textContent = `Manilha: ${data.manilha || '-'}`;
-      document.getElementById("timerInfo").textContent = `Tempo: ${tempoRestante(data)}s`;
-      document.getElementById("timeInfo").textContent = meuTime;
-      document.getElementById("posicaoInfo").textContent = "baixo";
-
-      const fimEl = document.getElementById("fimPartida");
-      if (encerrada) {
-        fimEl.style.display = "block";
-        fimEl.textContent = `🏆 Partida encerrada — vencedor: ${data.vencedorFinal || ((data.pontos?.A || 0) >= 12 ? nomeDoTime(players, 'A') : nomeDoTime(players, 'B'))}`;
-      } else {
-        fimEl.style.display = "none";
-        fimEl.textContent = "";
-      }
-
-      const seats = seatsParaJogadores(players);
-      const setSeat = (seatId, idNome, idMao, playerId) => {
-        const seatEl = document.getElementById(seatId);
-        const nomeEl = document.getElementById(idNome);
-        if (!playerId || !players[playerId]) {
-          seatEl.style.display = "none";
-          nomeEl.textContent = "";
-          renderMiniHand(idMao, 0);
-          return;
-        }
-        seatEl.style.display = "flex";
-        nomeEl.textContent = players[playerId].nome;
-        const count = ((data.hands && data.hands[playerId]) || []).length;
-        renderMiniHand(idMao, count);
-      };
-      setSeat("seatTopo", "nomeTopo", "maoTopo", seats.top);
-      setSeat("seatEsquerda", "nomeEsquerda", "maoEsquerda", seats.left);
-      setSeat("seatDireita", "nomeDireita", "maoDireita", seats.right);
-
-      const resumo = document.getElementById("resumoRodadas");
-      resumo.innerHTML = "";
-      (data.rodadas || []).forEach((r, idx) => {
-        const badge = document.createElement("div");
-        badge.className = "badge";
-        badge.textContent = r === "E" ? `R${idx + 1}: E` : `R${idx + 1}: ${r}`;
-        resumo.appendChild(badge);
-      });
-      if ((data.rodadas || []).length === 0) resumo.innerHTML = "<div class='badge'>Sem resultado</div>";
-
-      const mesaDiv = document.getElementById("mesaCartas");
-      mesaDiv.innerHTML = "";
-      document.getElementById("cartaJogadaTopo").innerHTML = "";
-      document.getElementById("cartaJogadaEsquerda").innerHTML = "";
-      document.getElementById("cartaJogadaDireita").innerHTML = "";
-      document.getElementById("cartaJogadaBaixo").innerHTML = "";
-
-      const posicaoPorJogador = {};
-      if (seats.top) posicaoPorJogador[seats.top] = "Topo";
-      if (seats.left) posicaoPorJogador[seats.left] = "Esquerda";
-      if (seats.right) posicaoPorJogador[seats.right] = "Direita";
-      if (seats.bottom) posicaoPorJogador[seats.bottom] = "Baixo";
-
-      if (mesa.length === 0) {
-        mesaDiv.innerHTML = "<p>Nenhuma carta na mesa.</p>";
-      } else {
-        mesa.forEach(item => {
-          const wrap = document.createElement("div");
-          wrap.className = "carta-wrap";
-          const nomeJogador = document.createElement("div");
-          nomeJogador.className = "carta-nome";
-          nomeJogador.textContent = players[item.jogador]?.nome || "Jogador";
-          const carta = document.createElement("div");
-          carta.className = item.encoberta ? "carta usada encoberta" : "carta usada";
-          carta.textContent = item.carta;
-          wrap.appendChild(nomeJogador);
-          wrap.appendChild(carta);
-
-          const pos = posicaoPorJogador[item.jogador] || "Centro";
-          if (pos === "Topo") document.getElementById("cartaJogadaTopo").appendChild(wrap);
-          else if (pos === "Esquerda") document.getElementById("cartaJogadaEsquerda").appendChild(wrap);
-          else if (pos === "Direita") document.getElementById("cartaJogadaDireita").appendChild(wrap);
-          else if (pos === "Baixo") document.getElementById("cartaJogadaBaixo").appendChild(wrap);
-          else mesaDiv.appendChild(wrap);
-        });
-      }
-
-      const maoDiv = document.getElementById("maoCartas");
-      maoDiv.innerHTML = "";
-      mao.forEach(c => {
-        const carta = document.createElement("div");
-        carta.className = "carta" + (cartaSelecionada === c ? " selecionada" : "");
-        carta.textContent = c;
-        if (data.trucoPendente || !minhaVez || encerrada) {
-          carta.classList.add("usada");
-        } else {
-          carta.addEventListener("click", () => {
-            cartaSelecionada = (cartaSelecionada === c) ? null : c;
-            renderJogo(data);
-          });
-        }
-        maoDiv.appendChild(carta);
-      });
-
-      document.getElementById("btnAceitar").style.display = podeResponder ? "inline-block" : "none";
-      document.getElementById("btnCorrer").style.display = podeResponder ? "inline-block" : "none";
-
-      const btnTruco = document.getElementById("btnTruco");
-      const podeAumentar = podePedirAumento(data);
-      let nomeBotao = "Pedir Truco";
-      if ((data.trucoValor || 1) === 3) nomeBotao = "Pedir 6";
-      if ((data.trucoValor || 1) === 6) nomeBotao = "Pedir 9";
-      if ((data.trucoValor || 1) === 9) nomeBotao = "Pedir 12";
-      if ((data.trucoValor || 1) >= 12) nomeBotao = "Máximo 12";
-      btnTruco.textContent = nomeBotao;
-      btnTruco.disabled = !!data.trucoPendente || (data.trucoValor || 1) >= 12 || !minhaVez || !podeAumentar || encerrada;
-
-      document.getElementById("btnJogarSelecionada").disabled = !cartaSelecionada || !minhaVez || !!data.trucoPendente || encerrada;
-      document.getElementById("btnEncobrir").disabled = !cartaSelecionada || !minhaVez || !!data.trucoPendente || encerrada;
-      document.getElementById("btnAceitar").disabled = !podeResponder || encerrada;
-      document.getElementById("btnCorrer").disabled = !podeResponder || encerrada;
-    }
-
-    function ouvirSala() {
-      if (salaListener) salaListener();
-      const ref = db.collection("salas").doc(salaId);
-      salaListener = ref.onSnapshot(async (doc) => {
-        try {
-          const data = doc.data();
-          if (!data) return;
-          const lista = document.getElementById("lista");
-          const status = document.getElementById("status");
-          const modoSala = document.getElementById("modoSala");
-          lista.innerHTML = "";
-          const players = data.players || {};
-          const prontos = data.prontos || {};
-          const entries = Object.entries(players);
-          const total = entries.length;
-          const limite = data.limiteJogadores || 2;
-
-          entries.forEach(([id, jogador]) => {
-            const li = document.createElement("li");
-            const pronto = prontos[id] ? "✅" : "❌";
-            li.textContent = `${jogador.nome} ${pronto}`;
-            lista.appendChild(li);
-          });
-
-          modoSala.textContent = `Modo da sala: ${data.modo || "1x1"} • Jogadores: ${total}/${limite}`;
-          const totalProntos = Object.values(prontos).filter(Boolean).length;
-
-          if (!data.gameStarted) {
-            if (total < limite) {
-              status.textContent = `Aguardando ${limite - total} jogador(es)...`;
-              status.className = "info warning";
-            } else if (totalProntos < limite) {
-              status.textContent = `${totalProntos}/${limite} jogadores prontos`;
-              status.className = "info warning";
-            } else {
-              status.textContent = "Todos prontos. Iniciando partida...";
-              status.className = "info success";
-            }
-            await iniciarPartidaSeNecessario(data);
-          }
-
-          if (data.gameStarted) {
-            document.getElementById("espera").style.display = "none";
-            document.getElementById("jogo").style.display = "block";
-            renderJogo(data);
-          }
-        } catch (erro) {
-          mostrarErro(erro.message || "Erro ao atualizar sala.");
-        }
-      }, (erro) => {
-        mostrarErro(erro.message || "Erro ao ouvir a sala.");
+  <div id="erro" class="error"></div>
+
+  <div id="espera" class="box" style="display:none">
+    <h2>👥 Sala de espera</h2>
+    <div id="modoSala"></div>
+    <ul id="lista"></ul>
+    <button id="btnPronto" type="button">Estou pronto ✅</button>
+    <p id="status">Aguardando jogadores...</p>
+  </div>
+
+  <div id="jogo" style="display:none">
+    <div class="game-layout">
+      <aside class="side">
+        <div class="side-block"><div class="side-title">Placar</div><div class="placar" id="placar"></div></div>
+        <div class="side-block"><div class="side-title">Informações</div><div id="turnoInfo"></div><div id="rodadaInfo"></div><div id="trucoInfo"></div><div class="timer" id="timerInfo"></div></div>
+        <div class="side-block"><div class="side-title">Rodadas</div><div class="rounds" id="resumoRodadas"></div></div>
+        <div class="side-block"><div class="side-title">Status</div><div id="statusJogo"></div><div id="fimPartida" class="finish" style="display:none"></div></div>
+      </aside>
+
+      <main class="table-shell">
+        <div class="table">
+          <div class="center-vira">
+            <div class="badge">🪄 Vira</div>
+            <div class="card" id="viraCarta">?</div>
+            <div class="badge" id="manilhaInfo">Manilha: -</div>
+          </div>
+
+          <div class="seat top-seat" id="seatTop"><div class="avatar">🙂</div><div class="name" id="nameTop">Aguardando</div><div class="preview" id="previewTop"></div></div>
+          <div class="seat left-seat" id="seatLeft"><div class="avatar">😎</div><div class="name" id="nameLeft">Aguardando</div><div class="preview" id="previewLeft"></div></div>
+          <div class="seat right-seat" id="seatRight"><div class="avatar">🤖</div><div class="name" id="nameRight">Aguardando</div><div class="preview" id="previewRight"></div></div>
+          <div class="seat bottom-seat" id="seatBottom"><div class="avatar">😄</div><div class="name" id="nameBottom">Você</div></div>
+
+          <div class="played top" id="playedTop"></div>
+          <div class="played left" id="playedLeft"></div>
+          <div class="played right" id="playedRight"></div>
+          <div class="played bottom" id="playedBottom"></div>
+
+          <div class="bottom-panel">
+            <div class="status-line"><span>Seu lugar: <strong>baixo</strong></span><span>Seu time: <strong id="timeInfo">A</strong></span></div>
+            <div class="hand" id="maoCartas"></div>
+            <div class="row">
+              <button id="btnJogarSelecionada" class="blue" type="button">Jogar selecionada</button>
+              <button id="btnEncobrir" class="secondary" type="button">Encobrir</button>
+            </div>
+            <div class="row">
+              <button id="btnTruco" type="button">Pedir Truco</button>
+              <button id="btnAceitar" class="green" type="button">Aceitar</button>
+              <button id="btnCorrer" class="danger" type="button">Correr</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="debug" class="box" style="display:none"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyD4YnuGHnyAKtQERG1ojY8Nie00dMDoOAc",
+  authDomain: "truco-online-eaab3.firebaseapp.com",
+  projectId: "truco-online-eaab3",
+  storageBucket: "truco-online-eaab3.firebasestorage.app",
+  messagingSenderId: "549011297387",
+  appId: "1:549011297387:web:e6490bc55684742e3dcd2e"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const BARALHO = [
+  "4♠","5♠","6♠","7♠","Q♠","J♠","K♠","A♠","2♠","3♠",
+  "4♥","5♥","6♥","7♥","Q♥","J♥","K♥","A♥","2♥","3♥",
+  "4♦","5♦","6♦","7♦","Q♦","J♦","K♦","A♦","2♦","3♦",
+  "4♣","5♣","6♣","7♣","Q♣","J♣","K♣","A♣","2♣","3♣"
+];
+const ORDEM = ["4","5","6","7","Q","J","K","A","2","3"];
+const ORDEM_NAIPES = { "♣":1, "♥":2, "♠":3, "♦":4 };
+const TEMPO_JOGADA = 20;
+
+let salaId = "";
+let nome = "";
+let salaListener = null;
+let cartaSelecionada = null;
+let autoPlayLock = false;
+
+let jogadorId = sessionStorage.getItem("truco_jogador_id");
+if (!jogadorId) {
+  jogadorId = Math.random().toString(36).substring(2, 10);
+  sessionStorage.setItem("truco_jogador_id", jogadorId);
+}
+
+function mostrarErro(msg){ document.getElementById('erro').textContent = msg || ''; if(msg) console.error(msg); }
+function debug(msg){ const el=document.getElementById('debug'); el.style.display='block'; el.textContent=String(msg); }
+function embaralhar(lista){ const a=[...lista]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function idsOrdenados(players){ return Object.keys(players||{}).sort(); }
+function valorFace(c){ return c.slice(0,-1); }
+function naipeCarta(c){ return c.slice(-1); }
+function definirManilha(vira){ const idx=ORDEM.indexOf(valorFace(vira)); return ORDEM[(idx+1)%ORDEM.length]; }
+function forcaCarta(carta, manilha){ if(carta==='🂠') return -1; const face=valorFace(carta); const naipe=naipeCarta(carta); if(face===manilha) return 100 + (ORDEM_NAIPES[naipe]||0); return ORDEM.indexOf(face); }
+function timeDoJogador(players,id){ const ids=idsOrdenados(players); const idx=ids.indexOf(id); return idx%2===0?'A':'B'; }
+function proximoValorTruco(atual){ if(atual===1) return 3; if(atual===3) return 6; if(atual===6) return 9; if(atual===9) return 12; return 12; }
+function podePedirAumento(data){ const ultimoValor=data.trucoValor||1; const ultimoAceitou=data.trucoAceitoPor||''; const ultimoPediu=data.trucoPedidoPorUltimo||''; if(ultimoValor===1) return true; if(!ultimoAceitou) return false; return jogadorId===ultimoAceitou && jogadorId!==ultimoPediu; }
+function nomeDoTime(players,time){ const ids=idsOrdenados(players); return ids.filter((id,idx)=>(idx%2===0?'A':'B')===time).map(id=>players[id]?.nome||'Jogador').join(' / ') || `Time ${time}`; }
+function placarComNomes(players,pontos){ return `${nomeDoTime(players,'A')}: ${pontos?.A||0} × ${pontos?.B||0} :${nomeDoTime(players,'B')}`; }
+function decidirVencedorDaMao(rodadas, maoInicialTime='A'){ if(!rodadas||rodadas.length===0) return null; const [r1,r2,r3]=rodadas; if(rodadas.length===1) return null; if(r1==='E'){ if(rodadas.length===2) return r2&&r2!=='E'?r2:null; if(r2==='E'&&r3==='E') return maoInicialTime; if(r2==='E') return r3&&r3!=='E'?r3:maoInicialTime; return r2; } if(r2==='E') return r1; if(r1===r2) return r1; if(rodadas.length<3) return null; if(r3==='E') return r1; return r3||null; }
+function tempoRestante(data){ if(!data.turnStartedAt) return TEMPO_JOGADA; const inicio=data.turnStartedAt.toMillis?data.turnStartedAt.toMillis():data.turnStartedAt; return Math.max(0, TEMPO_JOGADA - Math.floor((Date.now()-inicio)/1000)); }
+function fimDePartida(data){ return (data.pontos?.A||0)>=12 || (data.pontos?.B||0)>=12 || data.partidaEncerrada; }
+function seatsParaJogadores(players){ const ids=idsOrdenados(players); const meuIndex=ids.indexOf(jogadorId); const result={top:null,left:null,right:null,bottom:null}; if(meuIndex===-1) return result; result.bottom=ids[meuIndex]; if(ids.length===2) result.top=ids[(meuIndex+1)%2]; if(ids.length===4){ result.top=ids[(meuIndex+2)%4]; result.left=ids[(meuIndex+3)%4]; result.right=ids[(meuIndex+1)%4]; } return result; }
+function renderPreview(elId,count){ const el=document.getElementById(elId); el.innerHTML=''; for(let i=0;i<3;i++){ const c=document.createElement('div'); c.className='mini'+(i>=count?' empty':''); el.appendChild(c); } }
+
+async function entrar(){
+  try{
+    mostrarErro('');
+    nome=document.getElementById('nome').value.trim();
+    salaId=document.getElementById('sala').value.trim();
+    const modoSelecionado=document.getElementById('modo').value;
+    if(!nome||!salaId){ mostrarErro('Preencha nome e código da sala.'); return; }
+    const ref=db.collection('salas').doc(salaId);
+    const snap=await ref.get();
+    if(!snap.exists){
+      await ref.set({
+        players:{}, prontos:{}, gameStarted:false, modo:modoSelecionado, limiteJogadores: modoSelecionado==='1x1'?2:4,
+        hands:{}, mesa:[], ultimaMesa:[], turno:0, pontos:{A:0,B:0}, trucoValor:1, trucoPedidoPorUltimo:'', trucoAceitoPor:'', rodada:1, rodadas:[],
+        vira:'', manilha:'', trucoPendente:false, trucoPedidoPor:'', trucoProposto:null, maoInicialTime:'A', ultimoVencedor:'',
+        turnStartedAt:null, partidaEncerrada:false, vencedorFinal:''
       });
     }
+    await db.runTransaction(async t=>{
+      const doc=await t.get(ref); const data=doc.data()||{};
+      data.players=data.players||{}; data.prontos=data.prontos||{}; data.hands=data.hands||{}; data.mesa=data.mesa||[]; data.ultimaMesa=data.ultimaMesa||[];
+      data.modo=data.modo||modoSelecionado; data.limiteJogadores=data.limiteJogadores||(data.modo==='1x1'?2:4); data.pontos=data.pontos||{A:0,B:0};
+      if(data.turno===undefined) data.turno=0; data.rodadas=data.rodadas||[]; data.trucoValor=data.trucoValor||1; data.trucoPedidoPorUltimo=data.trucoPedidoPorUltimo||'';
+      data.trucoAceitoPor=data.trucoAceitoPor||''; data.rodada=data.rodada||1; data.vira=data.vira||''; data.manilha=data.manilha||''; if(data.trucoPendente===undefined) data.trucoPendente=false;
+      data.trucoPedidoPor=data.trucoPedidoPor||''; if(data.trucoProposto===undefined) data.trucoProposto=null; data.maoInicialTime=data.maoInicialTime||'A'; data.ultimoVencedor=data.ultimoVencedor||'';
+      if(data.partidaEncerrada===undefined) data.partidaEncerrada=false; data.vencedorFinal=data.vencedorFinal||'';
+      const total=Object.keys(data.players).length; const jaEsta=!!data.players[jogadorId]; if(!jaEsta && total>=data.limiteJogadores) throw new Error('Sala cheia para esse modo.');
+      data.players[jogadorId]={nome}; if(data.prontos[jogadorId]===undefined) data.prontos[jogadorId]=false; t.set(ref,data);
+    });
+    document.getElementById('espera').style.display='block'; ouvirSala(); debug(`Entrou na sala ${salaId} como ${nome} (${jogadorId})`);
+  }catch(e){ mostrarErro(e.message||'Não foi possível entrar.'); }
+}
 
-    document.getElementById("btnEntrar").addEventListener("click", entrar);
-    document.getElementById("btnPronto").addEventListener("click", ficarPronto);
-    document.getElementById("btnTruco").addEventListener("click", pedirTruco);
-    document.getElementById("btnAceitar").addEventListener("click", aceitarTruco);
-    document.getElementById("btnCorrer").addEventListener("click", correrTruco);
-    document.getElementById("btnJogarSelecionada").addEventListener("click", jogarCartaSelecionada);
-    document.getElementById("btnEncobrir").addEventListener("click", encobrirCartaSelecionada);
-  </script>
+async function ficarPronto(){
+  try{
+    if(!salaId){ mostrarErro('Entre em uma sala primeiro.'); return; }
+    const ref=db.collection('salas').doc(salaId);
+    await db.runTransaction(async t=>{ const doc=await t.get(ref); const data=doc.data()||{}; data.prontos=data.prontos||{}; data.prontos[jogadorId]=true; t.update(ref,{prontos:data.prontos}); });
+  }catch(e){ mostrarErro(e.message||'Não foi possível marcar pronto.'); }
+}
+
+async function iniciarPartidaSeNecessario(data){
+  const ref=db.collection('salas').doc(salaId); const limite=data.limiteJogadores||2; const total=Object.keys(data.players||{}).length; const totalProntos=Object.values(data.prontos||{}).filter(Boolean).length;
+  if(total===limite && totalProntos===limite && !data.gameStarted){
+    await db.runTransaction(async t=>{
+      const doc=await t.get(ref); const d=doc.data()||{}; if(d.gameStarted) return;
+      const jogadores=idsOrdenados(d.players||{}); const deck=embaralhar(BARALHO); const hands={};
+      for(let i=0;i<jogadores.length;i++) hands[jogadores[i]]=deck.splice(0,3);
+      const vira=deck.pop(); const manilha=definirManilha(vira);
+      t.update(ref,{gameStarted:true,hands,mesa:[],ultimaMesa:[],turno:0,pontos:d.pontos||{A:0,B:0},trucoValor:1,trucoPedidoPorUltimo:'',trucoAceitoPor:'',rodada:1,rodadas:[],ultimoVencedor:'',vira,manilha,trucoPendente:false,trucoPedidoPor:'',trucoProposto:null,maoInicialTime:'A',turnStartedAt:firebase.firestore.FieldValue.serverTimestamp(),partidaEncerrada:false,vencedorFinal:''});
+    });
+  }
+}
+
+function prepararNovaMao(data,vencedorTime=null){
+  const players=data.players||{}; const ids=idsOrdenados(players); const deck=embaralhar(BARALHO); const hands={};
+  for(let i=0;i<ids.length;i++) hands[ids[i]]=deck.splice(0,3);
+  const vira=deck.pop(); const manilha=definirManilha(vira);
+  data.hands=hands; data.mesa=[]; data.ultimaMesa=[]; data.turno=0; data.trucoValor=1; data.trucoPedidoPorUltimo=''; data.trucoAceitoPor=''; data.rodada=1; data.rodadas=[];
+  data.vira=vira; data.manilha=manilha; data.trucoPendente=false; data.trucoPedidoPor=''; data.trucoProposto=null; data.maoInicialTime=vencedorTime||data.maoInicialTime||'A'; data.turnStartedAt=Date.now();
+  if(vencedorTime) data.ultimoVencedor=`${nomeDoTime(players,vencedorTime)} venceu a mão`;
+  if((data.pontos?.A||0)>=12 || (data.pontos?.B||0)>=12){ data.partidaEncerrada=true; const final=(data.pontos?.A||0)>=12?'A':'B'; data.vencedorFinal=nomeDoTime(players,final); }
+}
+
+async function jogarCartaInterna(carta,encoberta=false){
+  try{
+    const ref=db.collection('salas').doc(salaId);
+    await db.runTransaction(async t=>{
+      const doc=await t.get(ref); const data=doc.data()||{}; const players=data.players||{}; const ids=idsOrdenados(players);
+      if(!data.gameStarted) throw new Error('A partida ainda não começou.');
+      if(data.partidaEncerrada) throw new Error('A partida já acabou.');
+      if(data.trucoPendente) throw new Error('Responda ao truco antes de jogar.');
+      if(ids[data.turno]!==jogadorId) throw new Error('Não é sua vez.');
+      if(!data.hands?.[jogadorId]?.includes(carta)) throw new Error('Carta inválida.');
+      data.hands[jogadorId]=data.hands[jogadorId].filter(c=>c!==carta);
+      data.mesa=data.mesa||[];
+      data.mesa.push({jogador:jogadorId,carta:encoberta?'🂠':carta,real:carta,encoberta:!!encoberta});
+      data.turno=(data.turno+1)%ids.length; data.turnStartedAt=Date.now();
+      const necessarias=data.modo==='1x1'?2:4;
+      if(data.mesa.length>=necessarias){
+        let maior=forcaCarta(data.mesa[0].real||data.mesa[0].carta,data.manilha); let vencedores=[data.mesa[0]];
+        for(let i=1;i<data.mesa.length;i++){
+          const atual=forcaCarta(data.mesa[i].real||data.mesa[i].carta,data.manilha);
+          if(atual>maior){ maior=atual; vencedores=[data.mesa[i]]; }
+          else if(atual===maior){ vencedores.push(data.mesa[i]); }
+        }
+        const empate=vencedores.length>1; data.rodadas=data.rodadas||[];
+        if(empate){ data.rodadas.push('E'); data.ultimoVencedor='Rodada empatou (canga)'; }
+        else { const vencedor=vencedores[0]; const time=timeDoJogador(players,vencedor.jogador); data.rodadas.push(time); data.ultimoVencedor=`${players[vencedor.jogador]?.nome||'Jogador'} venceu a rodada`; data.turno=ids.indexOf(vencedor.jogador); data.turnStartedAt=Date.now(); }
+        data.ultimaMesa=[...data.mesa]; data.mesa=[]; data.rodada=(data.rodada||1)+1;
+        const vencedorMao=decidirVencedorDaMao(data.rodadas,data.maoInicialTime||'A');
+        if(vencedorMao){ data.pontos=data.pontos||{A:0,B:0}; data.pontos[vencedorMao]=Math.min(12,(data.pontos[vencedorMao]||0)+(data.trucoValor||1)); data.ultimoVencedor=`${nomeDoTime(players,vencedorMao)} ganhou a mão`; prepararNovaMao(data,vencedorMao); }
+      }
+      t.set(ref,data);
+    });
+    cartaSelecionada=null;
+  }catch(e){ mostrarErro(e.message||'Não foi possível jogar a carta.'); }
+}
+
+async function jogarCartaSelecionada(){ if(!cartaSelecionada){ mostrarErro('Selecione uma carta primeiro.'); return; } await jogarCartaInterna(cartaSelecionada,false); }
+async function encobrirCartaSelecionada(){ if(!cartaSelecionada){ mostrarErro('Selecione uma carta primeiro.'); return; } await jogarCartaInterna(cartaSelecionada,true); }
+
+async function pedirTruco(){
+  try{
+    const ref=db.collection('salas').doc(salaId);
+    await db.runTransaction(async t=>{
+      const doc=await t.get(ref); const data=doc.data()||{}; const players=data.players||{}; const ids=idsOrdenados(players);
+      if(!data.gameStarted) throw new Error('A partida ainda não começou.');
+      if(data.partidaEncerrada) throw new Error('A partida já acabou.');
+      if(data.trucoPendente) throw new Error('Já existe um truco pendente.');
+      if(ids[data.turno]!==jogadorId) throw new Error('Só quem está na vez pode pedir.');
+      if((data.trucoValor||1)>=12) throw new Error('A mão já está valendo 12.');
+      if(!podePedirAumento(data)) throw new Error('Agora só quem aceitou a última aposta pode aumentar.');
+      const proximo=proximoValorTruco(data.trucoValor||1); data.trucoPendente=true; data.trucoPedidoPor=jogadorId; data.trucoProposto=proximo; data.ultimoVencedor=`${players[jogadorId]?.nome||'Jogador'} pediu ${proximo===3?'TRUCO':proximo}`; t.set(ref,data);
+    });
+  }catch(e){ mostrarErro(e.message||'Não foi possível pedir truco.'); }
+}
+
+async function aceitarTruco(){
+  try{
+    const ref=db.collection('salas').doc(salaId);
+    await db.runTransaction(async t=>{
+      const doc=await t.get(ref); const data=doc.data()||{}; const players=data.players||{};
+      if(!data.trucoPendente) throw new Error('Não há truco pendente.');
+      if(data.trucoPedidoPor===jogadorId) throw new Error('Quem pediu não pode aceitar.');
+      if(timeDoJogador(players,data.trucoPedidoPor)===timeDoJogador(players,jogadorId)) throw new Error('Só o adversário pode aceitar o truco.');
+      data.trucoValor=data.trucoProposto||data.trucoValor||1; data.trucoAceitoPor=jogadorId; data.trucoPedidoPorUltimo=data.trucoPedidoPor||''; data.trucoPendente=false; data.trucoPedidoPor=''; data.trucoProposto=null; data.ultimoVencedor=`${players[jogadorId]?.nome||'Jogador'} aceitou. A mão agora vale ${data.trucoValor}.`; t.set(ref,data);
+    });
+  }catch(e){ mostrarErro(e.message||'Não foi possível aceitar.'); }
+}
+
+async function correrTruco(){
+  try{
+    const ref=db.collection('salas').doc(salaId);
+    await db.runTransaction(async t=>{
+      const doc=await t.get(ref); const data=doc.data()||{}; const players=data.players||{};
+      if(!data.trucoPendente) throw new Error('Não há truco pendente.');
+      if(data.trucoPedidoPor===jogadorId) throw new Error('Quem pediu não pode correr.');
+      if(timeDoJogador(players,data.trucoPedidoPor)===timeDoJogador(players,jogadorId)) throw new Error('Só o adversário pode correr.');
+      const timePediu=timeDoJogador(players,data.trucoPedidoPor); data.pontos=data.pontos||{A:0,B:0}; data.pontos[timePediu]=Math.min(12,(data.pontos[timePediu]||0)+(data.trucoValor||1)); data.ultimoVencedor=`${players[jogadorId]?.nome||'Jogador'} correu. ${nomeDoTime(players,timePediu)} ganhou a mão e pontuou.`; prepararNovaMao(data,timePediu); t.set(ref,data);
+    });
+  }catch(e){ mostrarErro(e.message||'Não foi possível correr.'); }
+}
+
+async function tentarAutoJogar(data){
+  if(autoPlayLock) return;
+  const players=data.players||{}; const ids=idsOrdenados(players); const minhaVez=ids[data.turno]===jogadorId; const tempo=tempoRestante(data);
+  if(!data.gameStarted || data.partidaEncerrada || data.trucoPendente || !minhaVez || tempo>0) return;
+  const mao=(data.hands&&data.hands[jogadorId])||[];
+  if(mao.length===0) return;
+  autoPlayLock=true;
+  const aleatoria=mao[Math.floor(Math.random()*mao.length)];
+  try{ await jogarCartaInterna(aleatoria,false); } finally { setTimeout(()=>autoPlayLock=false,800); }
+}
+
+function renderJogo(data){
+  const players=data.players||{}; const ids=idsOrdenados(players); const meuTime=timeDoJogador(players,jogadorId); const mao=(data.hands&&data.hands[jogadorId])||[];
+  const mesa=(data.mesa&&data.mesa.length>0)?data.mesa:(data.ultimaMesa||[]); const nomeTurno=players[ids[data.turno]]?.nome||'-'; const minhaVez=ids[data.turno]===jogadorId;
+  const pedidoPorOutro=data.trucoPendente&&data.trucoPedidoPor!==jogadorId; const podeResponder=pedidoPorOutro&&timeDoJogador(players,data.trucoPedidoPor)!==timeDoJogador(players,jogadorId); const encerrada=fimDePartida(data);
+
+  document.getElementById('placar').textContent=placarComNomes(players,data.pontos);
+  document.getElementById('turnoInfo').textContent=minhaVez?`É sua vez`:`Vez de ${nomeTurno}`;
+  document.getElementById('rodadaInfo').textContent=`Rodada: ${data.rodada||1}`;
+  document.getElementById('trucoInfo').textContent=`Mão valendo: ${data.trucoValor||1}`;
+  document.getElementById('statusJogo').textContent=data.ultimoVencedor||'Jogo em andamento';
+  document.getElementById('viraCarta').textContent=data.vira||'?';
+  document.getElementById('manilhaInfo').textContent=`Manilha: ${data.manilha||'-'}`;
+  document.getElementById('timerInfo').textContent=`Tempo: ${tempoRestante(data)}s`;
+  document.getElementById('timeInfo').textContent=meuTime;
+
+  const fimEl=document.getElementById('fimPartida');
+  if(encerrada){ fimEl.style.display='block'; fimEl.textContent=`🏆 Partida encerrada — vencedor: ${data.vencedorFinal || ((data.pontos?.A||0)>=12?nomeDoTime(players,'A'):nomeDoTime(players,'B'))}`; }
+  else { fimEl.style.display='none'; fimEl.textContent=''; }
+
+  const seats=seatsParaJogadores(players);
+  const setSeat=(seatId,nameId,previewId,pid)=>{
+    const seat=document.getElementById(seatId); const nameEl=document.getElementById(nameId);
+    if(!pid||!players[pid]){ seat.style.display='none'; nameEl.textContent=''; renderPreview(previewId,0); return; }
+    seat.style.display='flex'; nameEl.textContent=players[pid].nome; renderPreview(previewId,((data.hands&&data.hands[pid])||[]).length);
+  };
+  setSeat('seatTop','nameTop','previewTop',seats.top);
+  setSeat('seatLeft','nameLeft','previewLeft',seats.left);
+  setSeat('seatRight','nameRight','previewRight',seats.right);
+  document.getElementById('nameBottom').textContent=players[seats.bottom]?.nome||'Você';
+
+  const rounds=document.getElementById('resumoRodadas'); rounds.innerHTML='';
+  (data.rodadas||[]).forEach((r,idx)=>{ const b=document.createElement('div'); b.className='round-badge'; b.textContent=r==='E'?`R${idx+1}: E`:`R${idx+1}: ${r}`; rounds.appendChild(b); });
+  if((data.rodadas||[]).length===0) rounds.innerHTML="<div class='round-badge'>Sem resultado</div>";
+
+  document.getElementById('playedTop').innerHTML=''; document.getElementById('playedLeft').innerHTML=''; document.getElementById('playedRight').innerHTML=''; document.getElementById('playedBottom').innerHTML='';
+  const posPorJogador={}; if(seats.top) posPorJogador[seats.top]='playedTop'; if(seats.left) posPorJogador[seats.left]='playedLeft'; if(seats.right) posPorJogador[seats.right]='playedRight'; if(seats.bottom) posPorJogador[seats.bottom]='playedBottom';
+  mesa.forEach(item=>{
+    const wrap=document.createElement('div'); wrap.className='card-wrap';
+    const nm=document.createElement('div'); nm.className='card-name'; nm.textContent=players[item.jogador]?.nome||'Jogador';
+    const cd=document.createElement('div'); cd.className='card small'+(item.encoberta?' back':''); cd.textContent=item.carta;
+    wrap.appendChild(nm); wrap.appendChild(cd);
+    const target=posPorJogador[item.jogador]; if(target) document.getElementById(target).appendChild(wrap);
+  });
+
+  const maoDiv=document.getElementById('maoCartas'); maoDiv.innerHTML='';
+  mao.forEach(c=>{
+    const card=document.createElement('div');
+    card.className='card selectable'+(cartaSelecionada===c?' selected':'')+((data.trucoPendente||!minhaVez||encerrada)?' disabled':'');
+    card.textContent=c;
+    if(!(data.trucoPendente||!minhaVez||encerrada)) card.addEventListener('click',()=>{ cartaSelecionada=(cartaSelecionada===c)?null:c; renderJogo(data); });
+    maoDiv.appendChild(card);
+  });
+
+  document.getElementById('btnAceitar').style.display=podeResponder?'inline-block':'none';
+  document.getElementById('btnCorrer').style.display=podeResponder?'inline-block':'none';
+  const btnTruco=document.getElementById('btnTruco'); const podeAumentar=podePedirAumento(data);
+  let nomeBotao='Pedir Truco'; if((data.trucoValor||1)===3) nomeBotao='Pedir 6'; if((data.trucoValor||1)===6) nomeBotao='Pedir 9'; if((data.trucoValor||1)===9) nomeBotao='Pedir 12'; if((data.trucoValor||1)>=12) nomeBotao='Máximo 12';
+  btnTruco.textContent=nomeBotao; btnTruco.disabled=!!data.trucoPendente||(data.trucoValor||1)>=12||!minhaVez||!podeAumentar||encerrada;
+  document.getElementById('btnJogarSelecionada').disabled=!cartaSelecionada||!minhaVez||!!data.trucoPendente||encerrada;
+  document.getElementById('btnEncobrir').disabled=!cartaSelecionada||!minhaVez||!!data.trucoPendente||encerrada;
+  document.getElementById('btnAceitar').disabled=!podeResponder||encerrada;
+  document.getElementById('btnCorrer').disabled=!podeResponder||encerrada;
+
+  tentarAutoJogar(data);
+}
+
+function ouvirSala(){
+  if(salaListener) salaListener();
+  const ref=db.collection('salas').doc(salaId);
+  salaListener=ref.onSnapshot(async doc=>{
+    try{
+      const data=doc.data(); if(!data) return;
+      const lista=document.getElementById('lista'); const status=document.getElementById('status'); const modoSala=document.getElementById('modoSala'); lista.innerHTML='';
+      const players=data.players||{}; const prontos=data.prontos||{}; const entries=Object.entries(players); const total=entries.length; const limite=data.limiteJogadores||2;
+      entries.forEach(([id,j])=>{ const li=document.createElement('li'); li.textContent=`${j.nome} ${prontos[id]?'✅':'❌'}`; lista.appendChild(li); });
+      modoSala.textContent=`Modo da sala: ${data.modo||'1x1'} • Jogadores: ${total}/${limite}`;
+      const totalProntos=Object.values(prontos).filter(Boolean).length;
+      if(!data.gameStarted){
+        if(total<limite){ status.textContent=`Aguardando ${limite-total} jogador(es)...`; }
+        else if(totalProntos<limite){ status.textContent=`${totalProntos}/${limite} jogadores prontos`; }
+        else{ status.textContent='Todos prontos. Iniciando partida...'; }
+        await iniciarPartidaSeNecessario(data);
+      }
+      if(data.gameStarted){ document.getElementById('espera').style.display='none'; document.getElementById('jogo').style.display='block'; renderJogo(data); }
+    }catch(e){ mostrarErro(e.message||'Erro ao atualizar sala.'); }
+  }, e=>mostrarErro(e.message||'Erro ao ouvir a sala.'));
+}
+
+document.getElementById('btnEntrar').addEventListener('click',entrar);
+document.getElementById('btnPronto').addEventListener('click',ficarPronto);
+document.getElementById('btnTruco').addEventListener('click',pedirTruco);
+document.getElementById('btnAceitar').addEventListener('click',aceitarTruco);
+document.getElementById('btnCorrer').addEventListener('click',correrTruco);
+document.getElementById('btnJogarSelecionada').addEventListener('click',jogarCartaSelecionada);
+document.getElementById('btnEncobrir').addEventListener('click',encobrirCartaSelecionada);
+</script>
 </body>
 </html>
