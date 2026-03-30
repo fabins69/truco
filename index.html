@@ -8,18 +8,23 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <style>
     :root {
-      --bg1: #06141d;
-      --bg2: #0c3142;
-      --panel: rgba(255,255,255,0.08);
-      --panel2: rgba(255,255,255,0.12);
+      --bg-dark: #09141c;
+      --wood1: #7c5a3a;
+      --wood2: #4e3521;
+      --felt1: #176d22;
+      --felt2: #0f5018;
+      --card-back: #ff756d;
+      --card-back-2: #ff9a92;
       --text: #ffffff;
       --muted: rgba(255,255,255,0.82);
       --accent: #ff9800;
-      --accent2: #ffb74d;
+      --accent-2: #ffb74d;
+      --blue: #1e88e5;
+      --green: #34c759;
       --danger: #e53935;
-      --secondary: #546e7a;
-      --success: #6cff8a;
-      --warning: #ffd166;
+      --secondary: #607d8b;
+      --panel: rgba(0,0,0,0.42);
+      --panel-soft: rgba(255,255,255,0.10);
       --shadow: 0 10px 28px rgba(0,0,0,.32);
     }
 
@@ -28,20 +33,20 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+      background: radial-gradient(circle at top, #173245, var(--bg-dark));
       color: var(--text);
-      text-align: center;
       min-height: 100vh;
     }
 
     .container {
-      max-width: 1180px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 24px 16px 40px;
+      padding: 18px 14px 30px;
     }
 
     h1 {
-      margin-bottom: 18px;
+      text-align: center;
+      margin: 6px 0 16px;
       letter-spacing: .4px;
     }
 
@@ -50,7 +55,7 @@
       justify-content: center;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     input, select {
@@ -66,7 +71,7 @@
     button {
       padding: 12px 18px;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       background: var(--accent);
       color: white;
       font-size: 16px;
@@ -76,63 +81,220 @@
     }
 
     button:hover { opacity: 0.94; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
     .secondary { background: var(--secondary); }
     .danger { background: var(--danger); }
+    .success-btn { background: var(--green); }
+    .blue-btn { background: var(--blue); }
 
     .box {
       max-width: 980px;
-      margin: 20px auto;
-      background: var(--panel);
+      margin: 16px auto;
+      background: rgba(255,255,255,0.07);
       border-radius: 18px;
-      padding: 20px;
+      padding: 18px;
       box-shadow: var(--shadow);
       backdrop-filter: blur(6px);
     }
 
-    ul { list-style: none; padding: 0; margin: 16px 0; }
+    .error { color: #ff9e9e; text-align: center; font-weight: bold; min-height: 22px; }
+    .info { text-align: center; }
+
+    ul { list-style: none; padding: 0; margin: 14px 0; }
     li {
-      background: var(--panel2);
+      background: rgba(255,255,255,0.09);
       margin: 8px 0;
       padding: 10px;
-      border-radius: 10px;
+      border-radius: 12px;
     }
 
-    .info { margin-top: 12px; font-size: 16px; }
-    .success { color: var(--success); font-weight: bold; }
-    .warning { color: var(--warning); }
-    .error { color: #ff8a8a; font-weight: bold; }
-    #debug { white-space: pre-wrap; font-size: 14px; opacity: 0.9; }
+    .game-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
 
-    .mesa-area { margin-top: 16px; }
-    .placar {
-      font-size: 22px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      line-height: 1.7;
-      background: rgba(0,0,0,.18);
+    .side-panel {
+      background: var(--panel);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .side-block {
+      background: rgba(255,255,255,0.08);
       border-radius: 14px;
-      padding: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
     }
 
-    .mesa-cartas, .mao-cartas, .linha-botoes, .resumo-rodadas, .linha-acoes {
+    .side-title {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      opacity: .9;
+      margin-bottom: 8px;
+    }
+
+    .placar {
+      line-height: 1.8;
+      font-weight: bold;
+      font-size: 17px;
+    }
+
+    .table-shell {
+      background: linear-gradient(135deg, var(--wood1), var(--wood2));
+      border-radius: 30px;
+      padding: 16px;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.15), var(--shadow);
+    }
+
+    .table-felt {
+      position: relative;
+      min-height: 720px;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at center, #1a7a26 0%, var(--felt1) 40%, var(--felt2) 100%);
+      box-shadow: inset 0 0 0 4px rgba(255,255,255,0.08), inset 0 0 40px rgba(0,0,0,.25);
+      overflow: hidden;
+    }
+
+    .table-header {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.35);
+      padding: 10px 14px;
+      border-radius: 999px;
       display: flex;
-      justify-content: center;
       gap: 12px;
       flex-wrap: wrap;
-      margin-top: 12px;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .player-seat {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .seat-top { top: 84px; left: 50%; transform: translateX(-50%); }
+    .seat-left { left: 18px; top: 50%; transform: translateY(-50%); }
+    .seat-right { right: 18px; top: 50%; transform: translateY(-50%); }
+    .seat-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); }
+
+    .player-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c4dff, #00bcd4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.28);
+      border: 3px solid rgba(255,255,255,.6);
+    }
+
+    .player-name {
+      background: rgba(0,0,0,.35);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      max-width: 130px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-hand-preview {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: nowrap;
+    }
+
+    .mini-card {
+      width: 38px;
+      height: 54px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--card-back), var(--card-back-2));
+      border: 2px solid rgba(255,255,255,.6);
+      box-shadow: 0 4px 10px rgba(0,0,0,.22);
+      color: rgba(255,255,255,.88);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mini-card.empty {
+      opacity: .18;
+    }
+
+    .center-zone {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .center-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      pointer-events: auto;
+    }
+
+    .center-vira {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0,0,0,.28);
+      padding: 10px 14px;
+      border-radius: 18px;
+    }
+
+    .mesa-cartas {
+      display: flex;
+      justify-content: center;
+      gap: 22px;
+      flex-wrap: wrap;
+      min-height: 180px;
+      align-items: center;
     }
 
     .carta-wrap {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .carta-nome {
       font-size: 14px;
-      opacity: 0.92;
+      opacity: 0.95;
+      background: rgba(0,0,0,.26);
+      padding: 6px 10px;
+      border-radius: 999px;
     }
 
     .carta {
@@ -144,7 +306,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 26px;
       font-weight: bold;
       cursor: pointer;
       box-shadow: 0 8px 18px rgba(0,0,0,0.28);
@@ -155,8 +317,8 @@
     .carta:hover { transform: translateY(-6px); }
     .carta.usada { opacity: 0.45; cursor: not-allowed; }
     .carta.selecionada {
-      outline: 4px solid var(--accent2);
-      transform: translateY(-8px);
+      outline: 4px solid var(--accent-2);
+      transform: translateY(-10px);
     }
 
     .carta.encoberta {
@@ -165,26 +327,37 @@
       border: 2px solid rgba(255,255,255,0.12);
     }
 
-    .subtitulo { opacity: 0.95; margin-top: 8px; }
-    .vira-box {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 14px;
-      margin-top: 10px;
-      flex-wrap: wrap;
+    .bottom-panel {
+      position: absolute;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      width: min(92%, 900px);
+      background: rgba(0,0,0,.35);
+      border-radius: 22px;
+      padding: 14px;
+      z-index: 3;
     }
 
-    .badge {
-      min-width: 38px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.12);
-      font-weight: bold;
+    .status-line {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .mao-cartas, .linha-botoes, .linha-acoes, .resumo-rodadas {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
     }
 
     .timer {
-      margin-top: 10px;
       font-size: 18px;
       font-weight: bold;
       color: var(--warning);
@@ -195,6 +368,21 @@
       font-weight: bold;
       color: var(--success);
       margin-top: 14px;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .game-layout { grid-template-columns: 1fr; }
+      .table-felt { min-height: 820px; }
+      .side-panel { order: 2; }
+    }
+
+    @media (max-width: 760px) {
+      .table-felt { min-height: 920px; }
+      .seat-left { left: 8px; }
+      .seat-right { right: 8px; }
+      .player-avatar { width: 54px; height: 54px; font-size: 24px; }
+      .carta { width: 82px; height: 118px; font-size: 22px; }
     }
   </style>
 </head>
@@ -212,7 +400,7 @@
       <button id="btnEntrar" type="button">Entrar</button>
     </div>
 
-    <div id="erro" class="info error"></div>
+    <div id="erro" class="error"></div>
 
     <div id="espera" class="box" style="display:none">
       <h2>👥 Sala de espera</h2>
@@ -222,47 +410,85 @@
       <p class="info" id="status">Aguardando jogadores...</p>
     </div>
 
-    <div id="jogo" class="box" style="display:none">
-      <div class="placar" id="placar">Placar</div>
-      <div class="subtitulo" id="turnoInfo">Turno:</div>
-      <div class="subtitulo" id="rodadaInfo">Rodada: 1</div>
-      <div class="subtitulo" id="trucoInfo">Mão valendo: 1</div>
-      <div class="timer" id="timerInfo">Tempo: --</div>
+    <div id="jogo" style="display:none">
+      <div class="game-layout">
+        <aside class="side-panel">
+          <div class="side-block">
+            <div class="side-title">Placar</div>
+            <div class="placar" id="placar">Placar</div>
+          </div>
+          <div class="side-block">
+            <div class="side-title">Informações</div>
+            <div class="info" id="turnoInfo">Turno:</div>
+            <div class="info" id="rodadaInfo">Rodada: 1</div>
+            <div class="info" id="trucoInfo">Mão valendo: 1</div>
+            <div class="timer" id="timerInfo">Tempo: --</div>
+          </div>
+          <div class="side-block">
+            <div class="side-title">Rodadas da mão</div>
+            <div class="resumo-rodadas" id="resumoRodadas"></div>
+          </div>
+          <div class="side-block">
+            <div class="side-title">Status</div>
+            <div class="info" id="statusJogo">A partida começou.</div>
+            <div id="fimPartida" class="fim" style="display:none"></div>
+          </div>
+        </aside>
 
-      <div class="vira-box">
-        <div>🪄 Vira/Tombo:</div>
-        <div class="carta usada" id="viraCarta">?</div>
-        <div id="manilhaInfo">Manilha: -</div>
+        <main class="table-shell">
+          <div class="table-felt">
+            <div class="table-header">
+              <div class="badge">🪄 Vira</div>
+              <div class="carta usada" id="viraCarta">?</div>
+              <div class="badge" id="manilhaInfo">Manilha: -</div>
+            </div>
+
+            <div class="player-seat seat-top">
+              <div class="player-avatar">🙂</div>
+              <div class="player-name" id="nomeTopo">Aguardando</div>
+              <div class="player-hand-preview" id="maoTopo"></div>
+            </div>
+
+            <div class="player-seat seat-left">
+              <div class="player-avatar">😎</div>
+              <div class="player-name" id="nomeEsquerda">Aguardando</div>
+              <div class="player-hand-preview" id="maoEsquerda"></div>
+            </div>
+
+            <div class="player-seat seat-right">
+              <div class="player-avatar">🤖</div>
+              <div class="player-name" id="nomeDireita">Aguardando</div>
+              <div class="player-hand-preview" id="maoDireita"></div>
+            </div>
+
+            <div class="center-zone">
+              <div class="center-content">
+                <div class="mesa-cartas" id="mesaCartas"></div>
+              </div>
+            </div>
+
+            <div class="bottom-panel">
+              <div class="status-line">
+                <span>Seu lugar: <strong id="posicaoInfo">baixo</strong></span>
+                <span>Seu time: <strong id="timeInfo">A</strong></span>
+              </div>
+
+              <div class="mao-cartas" id="maoCartas"></div>
+
+              <div class="linha-acoes">
+                <button id="btnJogarSelecionada" type="button" class="blue-btn">Jogar selecionada</button>
+                <button id="btnEncobrir" type="button" class="secondary">Encobrir</button>
+              </div>
+
+              <div class="linha-botoes">
+                <button id="btnTruco" type="button">Pedir Truco</button>
+                <button id="btnAceitar" type="button" class="success-btn">Aceitar</button>
+                <button id="btnCorrer" type="button" class="danger">Correr</button>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
-
-      <div class="mesa-area">
-        <h3>📍 Resultado das rodadas da mão</h3>
-        <div class="resumo-rodadas" id="resumoRodadas"></div>
-      </div>
-
-      <div class="mesa-area">
-        <h3>🪑 Mesa</h3>
-        <div class="mesa-cartas" id="mesaCartas"></div>
-      </div>
-
-      <div class="mesa-area">
-        <h3>🖐️ Suas cartas</h3>
-        <div class="mao-cartas" id="maoCartas"></div>
-      </div>
-
-      <div class="mesa-area linha-acoes">
-        <button id="btnJogarSelecionada" type="button" class="secondary">Jogar carta selecionada</button>
-        <button id="btnEncobrir" type="button" class="secondary">Encobrir</button>
-      </div>
-
-      <div class="mesa-area linha-botoes">
-        <button id="btnTruco" type="button">Pedir Truco</button>
-        <button id="btnAceitar" type="button" class="secondary">Aceitar</button>
-        <button id="btnCorrer" type="button" class="danger">Correr</button>
-      </div>
-
-      <p class="info" id="statusJogo">A partida começou.</p>
-      <div id="fimPartida" class="fim" style="display:none"></div>
     </div>
 
     <div id="debug" class="box" style="display:none"></div>
@@ -311,7 +537,6 @@
       const box = document.getElementById("debug");
       box.style.display = "block";
       box.textContent = String(msg);
-      console.log(msg);
     }
 
     function embaralhar(lista) {
@@ -384,16 +609,13 @@
       const r1 = rodadas[0];
       const r2 = rodadas[1];
       const r3 = rodadas[2];
-
       if (rodadas.length === 1) return null;
-
       if (r1 === "E") {
         if (rodadas.length === 2) return r2 && r2 !== "E" ? r2 : null;
         if (r2 === "E" && r3 === "E") return maoInicialTime;
         if (r2 === "E") return r3 && r3 !== "E" ? r3 : maoInicialTime;
         return r2;
       }
-
       if (r2 === "E") return r1;
       if (r1 === r2) return r1;
       if (rodadas.length < 3) return null;
@@ -413,13 +635,38 @@
       return (data.pontos?.A || 0) >= 12 || (data.pontos?.B || 0) >= 12;
     }
 
+    function seatsParaJogadores(players) {
+      const ids = idsOrdenados(players);
+      const meuIndex = ids.indexOf(jogadorId);
+      const result = { top: null, left: null, right: null, bottom: null };
+      if (meuIndex === -1) return result;
+      result.bottom = ids[meuIndex];
+      if (ids.length === 2) result.top = ids[(meuIndex + 1) % 2];
+      if (ids.length === 4) {
+        result.top = ids[(meuIndex + 2) % 4];
+        result.left = ids[(meuIndex + 3) % 4];
+        result.right = ids[(meuIndex + 1) % 4];
+      }
+      return result;
+    }
+
+    function renderMiniHand(elId, count) {
+      const el = document.getElementById(elId);
+      el.innerHTML = "";
+      for (let i = 0; i < 3; i++) {
+        const c = document.createElement("div");
+        c.className = "mini-card" + (i >= count ? " empty" : "");
+        c.textContent = i < count ? "🂠" : "";
+        el.appendChild(c);
+      }
+    }
+
     async function entrar() {
       try {
         mostrarErro("");
         nome = document.getElementById("nome").value.trim();
         salaId = document.getElementById("sala").value.trim();
         const modoSelecionado = document.getElementById("modo").value;
-
         if (!nome || !salaId) {
           mostrarErro("Preencha nome e código da sala.");
           return;
@@ -446,7 +693,6 @@
             trucoAceitoPor: "",
             rodada: 1,
             rodadas: [],
-            rodadaAtualVitorias: { A: 0, B: 0 },
             vira: "",
             manilha: "",
             trucoPendente: false,
@@ -472,7 +718,6 @@
           if (!data.limiteJogadores) data.limiteJogadores = data.modo === "1x1" ? 2 : 4;
           if (!data.pontos) data.pontos = { A: 0, B: 0 };
           if (data.turno === undefined) data.turno = 0;
-          if (!data.rodadaAtualVitorias) data.rodadaAtualVitorias = { A: 0, B: 0 };
           if (!data.rodadas) data.rodadas = [];
           if (!data.trucoValor) data.trucoValor = 1;
           if (!data.trucoPedidoPorUltimo) data.trucoPedidoPorUltimo = "";
@@ -552,7 +797,6 @@
             trucoAceitoPor: "",
             rodada: 1,
             rodadas: [],
-            rodadaAtualVitorias: { A: 0, B: 0 },
             ultimoVencedor: "",
             vira,
             manilha,
@@ -585,7 +829,6 @@
       data.trucoAceitoPor = "";
       data.rodada = 1;
       data.rodadas = [];
-      data.rodadaAtualVitorias = { A: 0, B: 0 };
       data.vira = vira;
       data.manilha = manilha;
       data.trucoPendente = false;
@@ -724,13 +967,9 @@
           const doc = await t.get(ref);
           const data = doc.data() || {};
           const players = data.players || {};
-          const ids = idsOrdenados(players);
           if (!data.trucoPendente) throw new Error("Não há truco pendente.");
           if (data.trucoPedidoPor === jogadorId) throw new Error("Quem pediu não pode aceitar.");
           if (timeDoJogador(players, data.trucoPedidoPor) === timeDoJogador(players, jogadorId)) throw new Error("Só o adversário pode aceitar o truco.");
-          if (ids[data.turno] === jogadorId) {
-            // permitido, mas não obrigatório estar na vez
-          }
 
           data.trucoValor = data.trucoProposto || data.trucoValor || 1;
           data.trucoAceitoPor = jogadorId;
@@ -782,15 +1021,15 @@
       const encerrada = fimDePartida(data) || data.partidaEncerrada;
 
       document.getElementById("placar").textContent = placarComNomes(players, data.pontos);
-      document.getElementById("turnoInfo").textContent = minhaVez
-        ? `É sua vez • Seu time: ${meuTime}`
-        : `Vez de ${nomeTurno} • Seu time: ${meuTime}`;
+      document.getElementById("turnoInfo").textContent = minhaVez ? `É sua vez` : `Vez de ${nomeTurno}`;
       document.getElementById("rodadaInfo").textContent = `Rodada: ${data.rodada || 1}`;
       document.getElementById("trucoInfo").textContent = `Mão valendo: ${data.trucoValor || 1}`;
       document.getElementById("statusJogo").textContent = data.ultimoVencedor || "Jogo em andamento";
       document.getElementById("viraCarta").textContent = data.vira || "?";
       document.getElementById("manilhaInfo").textContent = `Manilha: ${data.manilha || '-'}`;
       document.getElementById("timerInfo").textContent = `Tempo: ${tempoRestante(data)}s`;
+      document.getElementById("timeInfo").textContent = meuTime;
+      document.getElementById("posicaoInfo").textContent = "baixo";
 
       const fimEl = document.getElementById("fimPartida");
       if (encerrada) {
@@ -801,6 +1040,22 @@
         fimEl.textContent = "";
       }
 
+      const seats = seatsParaJogadores(players);
+      const setSeat = (idNome, idMao, playerId) => {
+        const nomeEl = document.getElementById(idNome);
+        if (!playerId || !players[playerId]) {
+          nomeEl.textContent = "Aguardando";
+          renderMiniHand(idMao, 0);
+          return;
+        }
+        nomeEl.textContent = players[playerId].nome;
+        const count = ((data.hands && data.hands[playerId]) || []).length;
+        renderMiniHand(idMao, count);
+      };
+      setSeat("nomeTopo", "maoTopo", seats.top);
+      setSeat("nomeEsquerda", "maoEsquerda", seats.left);
+      setSeat("nomeDireita", "maoDireita", seats.right);
+
       const resumo = document.getElementById("resumoRodadas");
       resumo.innerHTML = "";
       (data.rodadas || []).forEach((r, idx) => {
@@ -809,7 +1064,7 @@
         badge.textContent = r === "E" ? `R${idx + 1}: E` : `R${idx + 1}: ${r}`;
         resumo.appendChild(badge);
       });
-      if ((data.rodadas || []).length === 0) resumo.innerHTML = "<p>Nenhuma rodada concluída ainda.</p>";
+      if ((data.rodadas || []).length === 0) resumo.innerHTML = "<div class='badge'>Sem resultado</div>";
 
       const mesaDiv = document.getElementById("mesaCartas");
       mesaDiv.innerHTML = "";
@@ -870,17 +1125,14 @@
     function ouvirSala() {
       if (salaListener) salaListener();
       const ref = db.collection("salas").doc(salaId);
-
       salaListener = ref.onSnapshot(async (doc) => {
         try {
           const data = doc.data();
           if (!data) return;
-
           const lista = document.getElementById("lista");
           const status = document.getElementById("status");
           const modoSala = document.getElementById("modoSala");
           lista.innerHTML = "";
-
           const players = data.players || {};
           const prontos = data.prontos || {};
           const entries = Object.entries(players);
