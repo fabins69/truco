@@ -467,6 +467,11 @@
               </div>
             </div>
 
+            <div id="cartaJogadaTopo" style="position:absolute; top:315px; left:50%; transform:translateX(-50%); z-index:2;"></div>
+            <div id="cartaJogadaEsquerda" style="position:absolute; left:150px; top:50%; transform:translateY(-50%); z-index:2;"></div>
+            <div id="cartaJogadaDireita" style="position:absolute; right:150px; top:50%; transform:translateY(-50%); z-index:2;"></div>
+            <div id="cartaJogadaBaixo" style="position:absolute; bottom:215px; left:50%; transform:translateX(-50%); z-index:2;"></div>
+
             <div class="bottom-panel">
               <div class="status-line">
                 <span>Seu lugar: <strong id="posicaoInfo">baixo</strong></span>
@@ -1073,6 +1078,17 @@
 
       const mesaDiv = document.getElementById("mesaCartas");
       mesaDiv.innerHTML = "";
+      document.getElementById("cartaJogadaTopo").innerHTML = "";
+      document.getElementById("cartaJogadaEsquerda").innerHTML = "";
+      document.getElementById("cartaJogadaDireita").innerHTML = "";
+      document.getElementById("cartaJogadaBaixo").innerHTML = "";
+
+      const posicaoPorJogador = {};
+      if (seats.top) posicaoPorJogador[seats.top] = "Topo";
+      if (seats.left) posicaoPorJogador[seats.left] = "Esquerda";
+      if (seats.right) posicaoPorJogador[seats.right] = "Direita";
+      if (seats.bottom) posicaoPorJogador[seats.bottom] = "Baixo";
+
       if (mesa.length === 0) {
         mesaDiv.innerHTML = "<p>Nenhuma carta na mesa.</p>";
       } else {
@@ -1087,7 +1103,13 @@
           carta.textContent = item.carta;
           wrap.appendChild(nomeJogador);
           wrap.appendChild(carta);
-          mesaDiv.appendChild(wrap);
+
+          const pos = posicaoPorJogador[item.jogador] || "Centro";
+          if (pos === "Topo") document.getElementById("cartaJogadaTopo").appendChild(wrap);
+          else if (pos === "Esquerda") document.getElementById("cartaJogadaEsquerda").appendChild(wrap);
+          else if (pos === "Direita") document.getElementById("cartaJogadaDireita").appendChild(wrap);
+          else if (pos === "Baixo") document.getElementById("cartaJogadaBaixo").appendChild(wrap);
+          else mesaDiv.appendChild(wrap);
         });
       }
 
