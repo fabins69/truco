@@ -8,18 +8,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <style>
     :root{
-      --bg:#10293a;
-      --wood1:#8c6541;
-      --wood2:#5d3f26;
-      --felt1:#13721e;
-      --felt2:#0b5415;
-      --panel:rgba(0,0,0,.38);
-      --panel2:rgba(255,255,255,.1);
-      --text:#fff;
-      --accent:#ff9f0a;
-      --blue:#1683d9;
-      --green:#2dbd5a;
-      --danger:#e54343;
+      --bg:#10293a; --wood1:#8c6541; --wood2:#5d3f26; --felt1:#13721e; --felt2:#0b5415;
+      --text:#fff; --accent:#ff9f0a; --blue:#1683d9; --green:#2dbd5a; --danger:#e54343;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#18374d,var(--bg));color:var(--text)}
@@ -28,8 +18,7 @@
     .topbar{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
     input,select{padding:12px;border:none;border-radius:12px;min-width:160px;font-size:16px}
     button{padding:12px 18px;border:none;border-radius:14px;background:var(--accent);color:#fff;font-size:16px;font-weight:bold;cursor:pointer}
-    button:disabled{opacity:.45;cursor:not-allowed}
-    .secondary{background:#5f7584}.danger{background:var(--danger)}.blue{background:var(--blue)}.green{background:var(--green)}
+    button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#5f7584}.danger{background:var(--danger)}.blue{background:var(--blue)}.green{background:var(--green)}
     .error{text-align:center;color:#ff9f9f;font-weight:bold;min-height:24px}
     .box{background:rgba(255,255,255,.06);border-radius:18px;padding:18px;max-width:980px;margin:16px auto}
     .game-layout{display:grid;grid-template-columns:250px 1fr;gap:16px}
@@ -42,53 +31,30 @@
     .center-vira{position:absolute;top:26px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;background:rgba(0,0,0,.28);padding:12px 16px;border-radius:24px;z-index:5}
     .badge{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.13);font-weight:bold;font-size:14px}
     .seat{position:absolute;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:4}
-    .top-seat{top:150px;left:50%;transform:translateX(-50%)}
-    .left-seat{left:30px;top:50%;transform:translateY(-50%)}
-    .right-seat{right:30px;top:50%;transform:translateY(-50%)}
-    .bottom-seat{bottom:188px;left:50%;transform:translateX(-50%)}
+    .top-seat{top:150px;left:50%;transform:translateX(-50%)} .left-seat{left:30px;top:50%;transform:translateY(-50%)} .right-seat{right:30px;top:50%;transform:translateY(-50%)} .bottom-seat{bottom:188px;left:50%;transform:translateX(-50%)}
     .avatar{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#7f5cff,#35c8ff);display:flex;align-items:center;justify-content:center;font-size:28px;border:3px solid rgba(255,255,255,.65)}
     .name{background:rgba(0,0,0,.35);padding:6px 10px;border-radius:999px;font-size:13px;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .preview{display:flex;gap:5px}
-    .mini{width:34px;height:48px;border-radius:8px;background:linear-gradient(135deg,#ff7f76,#ffa49b);border:2px solid rgba(255,255,255,.6)}
-    .mini.empty{opacity:.15}
-    .played{position:absolute;z-index:3;min-width:84px;display:flex;flex-direction:column;align-items:center;gap:6px}
-    .played.top{top:270px;left:50%;transform:translateX(-50%)}
-    .played.left{left:118px;top:50%;transform:translateY(-50%)}
-    .played.right{right:118px;top:50%;transform:translateY(-50%)}
-    .played.bottom{bottom:270px;left:50%;transform:translateX(-50%)}
-    .card-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
-    .card-name{background:rgba(0,0,0,.28);padding:5px 9px;border-radius:999px;font-size:13px}
-    .card{width:74px;height:108px;background:#fff;color:#111;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;box-shadow:0 8px 18px rgba(0,0,0,.28);user-select:none}
-    .card.small{width:68px;height:98px;font-size:18px}
-    .card.back{background:linear-gradient(135deg,#1d3557,#0d1b2a);color:#d0e6ff}
+    .preview{display:flex;gap:5px}.mini{width:34px;height:48px;border-radius:8px;background:linear-gradient(135deg,#ff7f76,#ffa49b);border:2px solid rgba(255,255,255,.6)}.mini.empty{opacity:.15}
+    .played{position:absolute;z-index:3;min-width:84px;display:flex;flex-direction:column;align-items:center;gap:6px}.played.top{top:270px;left:50%;transform:translateX(-50%)}.played.left{left:118px;top:50%;transform:translateY(-50%)}.played.right{right:118px;top:50%;transform:translateY(-50%)}.played.bottom{bottom:270px;left:50%;transform:translateX(-50%)}
+    .card-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}.card-name{background:rgba(0,0,0,.28);padding:5px 9px;border-radius:999px;font-size:13px}
+    .card{width:74px;height:108px;background:#fff;color:#111;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;box-shadow:0 8px 18px rgba(0,0,0,.28);user-select:none}.card.small{width:68px;height:98px;font-size:18px}.card.back{background:linear-gradient(135deg,#1d3557,#0d1b2a);color:#d0e6ff}
     .bottom-panel{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:min(94%,860px);background:rgba(0,0,0,.34);border-radius:24px;padding:14px;z-index:5}
-    .status-line,.row,.rounds{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:10px}
-    .hand{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:12px}
-    .selectable{cursor:pointer;transition:transform .14s,outline .14s}
-    .selectable:hover{transform:translateY(-6px)}
-    .selected{outline:4px solid #ffd166;transform:translateY(-8px)}
-    .disabled{opacity:.45;cursor:not-allowed}
-    .timer{font-size:18px;font-weight:bold;color:#ffd166}
-    .round-badge{padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.12);font-weight:bold}
-    .finish{font-size:22px;font-weight:bold;color:#7dff94;text-align:center;margin-top:10px}
-    #debug{white-space:pre-wrap;font-size:13px;opacity:.9}
+    .status-line,.row,.rounds{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:10px}.hand{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+    .selectable{cursor:pointer;transition:transform .14s,outline .14s}.selectable:hover{transform:translateY(-6px)}.selected{outline:4px solid #ffd166;transform:translateY(-8px)}.disabled{opacity:.45;cursor:not-allowed}
+    .timer{font-size:18px;font-weight:bold;color:#ffd166}.round-badge{padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.12);font-weight:bold}.finish{font-size:22px;font-weight:bold;color:#7dff94;text-align:center;margin-top:10px}
+    ul{list-style:none;padding:0;margin:12px 0} li{background:rgba(255,255,255,.08);margin:8px 0;padding:10px;border-radius:12px}
     @media (max-width:980px){.game-layout{grid-template-columns:1fr}.table{min-height:860px}}
   </style>
 </head>
 <body>
 <div class="container">
   <h1>🃏 Truco Online Campeonato</h1>
-
   <div class="topbar">
     <input id="nome" placeholder="Seu nome">
     <input id="sala" placeholder="Código da sala">
-    <select id="modo">
-      <option value="1x1">1x1</option>
-      <option value="2x2">2x2</option>
-    </select>
+    <select id="modo"><option value="1x1">1x1</option><option value="2x2">2x2</option></select>
     <button id="btnEntrar" type="button">Entrar</button>
   </div>
-
   <div id="erro" class="error"></div>
 
   <div id="espera" class="box" style="display:none">
@@ -106,16 +72,12 @@
         <div class="side-block"><div class="side-title">Informações</div><div id="turnoInfo"></div><div id="rodadaInfo"></div><div id="trucoInfo"></div><div class="timer" id="timerInfo"></div></div>
         <div class="side-block"><div class="side-title">Rodadas</div><div class="rounds" id="resumoRodadas"></div></div>
         <div class="side-block"><div class="side-title">Status</div><div id="statusJogo"></div><div id="fimPartida" class="finish" style="display:none"></div></div>
+        <div class="side-block" id="maoOnzeBloco" style="display:none"><div class="side-title">Mão de 11</div><div id="maoOnzeTexto"></div><div class="row"><button id="btnMaoOnzeJogar" class="green" type="button">Jogar</button><button id="btnMaoOnzeCorrer" class="danger" type="button">Correr</button></div></div>
       </aside>
 
       <main class="table-shell">
         <div class="table">
-          <div class="center-vira">
-            <div class="badge">🪄 Vira</div>
-            <div class="card" id="viraCarta">?</div>
-            <div class="badge" id="manilhaInfo">Manilha: -</div>
-          </div>
-
+          <div class="center-vira"><div class="badge">🪄 Vira</div><div class="card" id="viraCarta">?</div><div class="badge" id="manilhaInfo">Manilha: -</div></div>
           <div class="seat top-seat" id="seatTop"><div class="avatar">🙂</div><div class="name" id="nameTop">Aguardando</div><div class="preview" id="previewTop"></div></div>
           <div class="seat left-seat" id="seatLeft"><div class="avatar">😎</div><div class="name" id="nameLeft">Aguardando</div><div class="preview" id="previewLeft"></div></div>
           <div class="seat right-seat" id="seatRight"><div class="avatar">🤖</div><div class="name" id="nameRight">Aguardando</div><div class="preview" id="previewRight"></div></div>
@@ -129,15 +91,8 @@
           <div class="bottom-panel">
             <div class="status-line"><span>Seu lugar: <strong>baixo</strong></span><span>Seu time: <strong id="timeInfo">A</strong></span></div>
             <div class="hand" id="maoCartas"></div>
-            <div class="row">
-              <button id="btnJogarSelecionada" class="blue" type="button">Jogar selecionada</button>
-              <button id="btnEncobrir" class="secondary" type="button">Encobrir</button>
-            </div>
-            <div class="row">
-              <button id="btnTruco" type="button">Pedir Truco</button>
-              <button id="btnAceitar" class="green" type="button">Aceitar</button>
-              <button id="btnCorrer" class="danger" type="button">Correr</button>
-            </div>
+            <div class="row"><button id="btnJogarSelecionada" class="blue" type="button">Jogar selecionada</button><button id="btnEncobrir" class="secondary" type="button">Encobrir</button></div>
+            <div class="row"><button id="btnTruco" type="button">Pedir Truco</button><button id="btnAceitar" class="green" type="button">Aceitar</button><button id="btnCorrer" class="danger" type="button">Correr</button></div>
           </div>
         </div>
       </main>
@@ -148,307 +103,148 @@
 </div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyD4YnuGHnyAKtQERG1ojY8Nie00dMDoOAc",
-  authDomain: "truco-online-eaab3.firebaseapp.com",
-  projectId: "truco-online-eaab3",
-  storageBucket: "truco-online-eaab3.firebasestorage.app",
-  messagingSenderId: "549011297387",
-  appId: "1:549011297387:web:e6490bc55684742e3dcd2e"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const firebaseConfig={apiKey:"AIzaSyD4YnuGHnyAKtQERG1ojY8Nie00dMDoOAc",authDomain:"truco-online-eaab3.firebaseapp.com",projectId:"truco-online-eaab3",storageBucket:"truco-online-eaab3.firebasestorage.app",messagingSenderId:"549011297387",appId:"1:549011297387:web:e6490bc55684742e3dcd2e"};
+firebase.initializeApp(firebaseConfig); const db=firebase.firestore();
 
-const BARALHO = [
-  "4♠","5♠","6♠","7♠","Q♠","J♠","K♠","A♠","2♠","3♠",
-  "4♥","5♥","6♥","7♥","Q♥","J♥","K♥","A♥","2♥","3♥",
-  "4♦","5♦","6♦","7♦","Q♦","J♦","K♦","A♦","2♦","3♦",
-  "4♣","5♣","6♣","7♣","Q♣","J♣","K♣","A♣","2♣","3♣"
-];
-const ORDEM = ["4","5","6","7","Q","J","K","A","2","3"];
-const ORDEM_NAIPES = { "♣":1, "♥":2, "♠":3, "♦":4 };
-const TEMPO_JOGADA = 20;
-
-let salaId = "";
-let nome = "";
-let salaListener = null;
-let cartaSelecionada = null;
-let autoPlayLock = false;
-
-let jogadorId = sessionStorage.getItem("truco_jogador_id");
-if (!jogadorId) {
-  jogadorId = Math.random().toString(36).substring(2, 10);
-  sessionStorage.setItem("truco_jogador_id", jogadorId);
-}
-
-function mostrarErro(msg){ document.getElementById('erro').textContent = msg || ''; if(msg) console.error(msg); }
-function debug(msg){ const el=document.getElementById('debug'); el.style.display='block'; el.textContent=String(msg); }
-function embaralhar(lista){ const a=[...lista]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
-function idsOrdenados(players){ return Object.keys(players||{}).sort(); }
-function valorFace(c){ return c.slice(0,-1); }
-function naipeCarta(c){ return c.slice(-1); }
-function definirManilha(vira){ const idx=ORDEM.indexOf(valorFace(vira)); return ORDEM[(idx+1)%ORDEM.length]; }
-function forcaCarta(carta, manilha){ if(carta==='🂠') return -1; const face=valorFace(carta); const naipe=naipeCarta(carta); if(face===manilha) return 100 + (ORDEM_NAIPES[naipe]||0); return ORDEM.indexOf(face); }
-function timeDoJogador(players,id){ const ids=idsOrdenados(players); const idx=ids.indexOf(id); return idx%2===0?'A':'B'; }
-function proximoValorTruco(atual){ if(atual===1) return 3; if(atual===3) return 6; if(atual===6) return 9; if(atual===9) return 12; return 12; }
-function podePedirAumento(data){ const ultimoValor=data.trucoValor||1; const ultimoAceitou=data.trucoAceitoPor||''; const ultimoPediu=data.trucoPedidoPorUltimo||''; if(ultimoValor===1) return true; if(!ultimoAceitou) return false; return jogadorId===ultimoAceitou && jogadorId!==ultimoPediu; }
-function nomeDoTime(players,time){ const ids=idsOrdenados(players); return ids.filter((id,idx)=>(idx%2===0?'A':'B')===time).map(id=>players[id]?.nome||'Jogador').join(' / ') || `Time ${time}`; }
-function placarComNomes(players,pontos){ return `${nomeDoTime(players,'A')}: ${pontos?.A||0} × ${pontos?.B||0} :${nomeDoTime(players,'B')}`; }
-function decidirVencedorDaMao(rodadas, maoInicialTime='A'){ if(!rodadas||rodadas.length===0) return null; const [r1,r2,r3]=rodadas; if(rodadas.length===1) return null; if(r1==='E'){ if(rodadas.length===2) return r2&&r2!=='E'?r2:null; if(r2==='E'&&r3==='E') return maoInicialTime; if(r2==='E') return r3&&r3!=='E'?r3:maoInicialTime; return r2; } if(r2==='E') return r1; if(r1===r2) return r1; if(rodadas.length<3) return null; if(r3==='E') return r1; return r3||null; }
-function tempoRestante(data){ if(!data.turnStartedAt) return TEMPO_JOGADA; const inicio=data.turnStartedAt.toMillis?data.turnStartedAt.toMillis():data.turnStartedAt; return Math.max(0, TEMPO_JOGADA - Math.floor((Date.now()-inicio)/1000)); }
-function fimDePartida(data){ return (data.pontos?.A||0)>=12 || (data.pontos?.B||0)>=12 || data.partidaEncerrada; }
-function seatsParaJogadores(players){ const ids=idsOrdenados(players); const meuIndex=ids.indexOf(jogadorId); const result={top:null,left:null,right:null,bottom:null}; if(meuIndex===-1) return result; result.bottom=ids[meuIndex]; if(ids.length===2) result.top=ids[(meuIndex+1)%2]; if(ids.length===4){ result.top=ids[(meuIndex+2)%4]; result.left=ids[(meuIndex+3)%4]; result.right=ids[(meuIndex+1)%4]; } return result; }
-function renderPreview(elId,count){ const el=document.getElementById(elId); el.innerHTML=''; for(let i=0;i<3;i++){ const c=document.createElement('div'); c.className='mini'+(i>=count?' empty':''); el.appendChild(c); } }
+const BARALHO=["4♠","5♠","6♠","7♠","Q♠","J♠","K♠","A♠","2♠","3♠","4♥","5♥","6♥","7♥","Q♥","J♥","K♥","A♥","2♥","3♥","4♦","5♦","6♦","7♦","Q♦","J♦","K♦","A♦","2♦","3♦","4♣","5♣","6♣","7♣","Q♣","J♣","K♣","A♣","2♣","3♣"];
+const ORDEM=["4","5","6","7","Q","J","K","A","2","3"]; const ORDEM_NAIPES={"♣":1,"♥":2,"♠":3,"♦":4}; const TEMPO_JOGADA=20;
+let salaId="", nome="", salaListener=null, cartaSelecionada=null, autoPlayLock=false; let jogadorId=sessionStorage.getItem('truco_jogador_id'); if(!jogadorId){jogadorId=Math.random().toString(36).substring(2,10); sessionStorage.setItem('truco_jogador_id',jogadorId);} 
+function mostrarErro(msg){document.getElementById('erro').textContent=msg||''; if(msg) console.error(msg);} function debug(msg){const el=document.getElementById('debug'); el.style.display='block'; el.textContent=String(msg);} 
+function embaralhar(lista){const a=[...lista]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a;} function idsOrdenados(players){return Object.keys(players||{}).sort();}
+function valorFace(c){return c.slice(0,-1);} function naipeCarta(c){return c.slice(-1);} function definirManilha(v){const idx=ORDEM.indexOf(valorFace(v)); return ORDEM[(idx+1)%ORDEM.length];} function forcaCarta(c,m){if(c==='🂠') return -1; const f=valorFace(c), n=naipeCarta(c); if(f===m) return 100+(ORDEM_NAIPES[n]||0); return ORDEM.indexOf(f);} 
+function timeDoJogador(players,id){const ids=idsOrdenados(players); const idx=ids.indexOf(id); return idx%2===0?'A':'B';} function proximoValorTruco(atual){if(atual===1)return 3; if(atual===3)return 6; if(atual===6)return 9; if(atual===9)return 12; return 12;} 
+function podePedirAumento(data){if(data.maoDeOnzeAtiva || data.escuroAtivo) return false; const v=data.trucoValor||1, aceitou=data.trucoAceitoPor||'', pediu=data.trucoPedidoPorUltimo||''; if(v===1) return true; if(!aceitou) return false; return jogadorId===aceitou && jogadorId!==pediu;}
+function nomeDoTime(players,time){const ids=idsOrdenados(players); const nomes=ids.filter((id,idx)=>(idx%2===0?'A':'B')===time).map(id=>players[id]?.nome||'Jogador'); return nomes.join(' / ')||`Time ${time}`;}
+function placarComNomes(players,p){return `${nomeDoTime(players,'A')}: ${p?.A||0} × ${p?.B||0} :${nomeDoTime(players,'B')}`;}
+function nomeRodada(players,r){if(r==='E') return 'Empate'; return nomeDoTime(players,r);} 
+function decidirVencedorDaMao(rodadas,maoInicialTime='A'){if(!rodadas||rodadas.length===0) return null; const [r1,r2,r3]=rodadas; if(rodadas.length===1)return null; if(r1==='E'){if(rodadas.length===2) return r2&&r2!=='E'?r2:null; if(r2==='E'&&r3==='E') return maoInicialTime; if(r2==='E') return r3&&r3!=='E'?r3:maoInicialTime; return r2;} if(r2==='E') return r1; if(r1===r2) return r1; if(rodadas.length<3) return null; if(r3==='E') return r1; return r3||null;}
+function tempoRestante(data){if(!data.turnStartedAt) return TEMPO_JOGADA; const inicio=data.turnStartedAt.toMillis?data.turnStartedAt.toMillis():data.turnStartedAt; return Math.max(0,TEMPO_JOGADA-Math.floor((Date.now()-inicio)/1000));}
+function fimDePartida(data){return (data.pontos?.A||0)>=12||(data.pontos?.B||0)>=12||data.partidaEncerrada;}
+function seatsParaJogadores(players){const ids=idsOrdenados(players); const meuIndex=ids.indexOf(jogadorId); const res={top:null,left:null,right:null,bottom:null}; if(meuIndex===-1) return res; res.bottom=ids[meuIndex]; if(ids.length===2) res.top=ids[(meuIndex+1)%2]; if(ids.length===4){res.top=ids[(meuIndex+2)%4]; res.left=ids[(meuIndex+3)%4]; res.right=ids[(meuIndex+1)%4];} return res;}
+function renderPreview(elId,count){const el=document.getElementById(elId); el.innerHTML=''; for(let i=0;i<3;i++){const d=document.createElement('div'); d.className='mini'+(i>=count?' empty':''); el.appendChild(d);}}
+function starterTimeFromIndex(idx){return idx%2===0?'A':'B';}
 
 async function entrar(){
   try{
-    mostrarErro('');
-    nome=document.getElementById('nome').value.trim();
-    salaId=document.getElementById('sala').value.trim();
-    const modoSelecionado=document.getElementById('modo').value;
-    if(!nome||!salaId){ mostrarErro('Preencha nome e código da sala.'); return; }
-    const ref=db.collection('salas').doc(salaId);
-    const snap=await ref.get();
-    if(!snap.exists){
-      await ref.set({
-        players:{}, prontos:{}, gameStarted:false, modo:modoSelecionado, limiteJogadores: modoSelecionado==='1x1'?2:4,
-        hands:{}, mesa:[], ultimaMesa:[], turno:0, pontos:{A:0,B:0}, trucoValor:1, trucoPedidoPorUltimo:'', trucoAceitoPor:'', rodada:1, rodadas:[],
-        vira:'', manilha:'', trucoPendente:false, trucoPedidoPor:'', trucoProposto:null, maoInicialTime:'A', ultimoVencedor:'',
-        turnStartedAt:null, partidaEncerrada:false, vencedorFinal:''
-      });
-    }
-    await db.runTransaction(async t=>{
-      const doc=await t.get(ref); const data=doc.data()||{};
-      data.players=data.players||{}; data.prontos=data.prontos||{}; data.hands=data.hands||{}; data.mesa=data.mesa||[]; data.ultimaMesa=data.ultimaMesa||[];
-      data.modo=data.modo||modoSelecionado; data.limiteJogadores=data.limiteJogadores||(data.modo==='1x1'?2:4); data.pontos=data.pontos||{A:0,B:0};
-      if(data.turno===undefined) data.turno=0; data.rodadas=data.rodadas||[]; data.trucoValor=data.trucoValor||1; data.trucoPedidoPorUltimo=data.trucoPedidoPorUltimo||'';
-      data.trucoAceitoPor=data.trucoAceitoPor||''; data.rodada=data.rodada||1; data.vira=data.vira||''; data.manilha=data.manilha||''; if(data.trucoPendente===undefined) data.trucoPendente=false;
-      data.trucoPedidoPor=data.trucoPedidoPor||''; if(data.trucoProposto===undefined) data.trucoProposto=null; data.maoInicialTime=data.maoInicialTime||'A'; data.ultimoVencedor=data.ultimoVencedor||'';
-      if(data.partidaEncerrada===undefined) data.partidaEncerrada=false; data.vencedorFinal=data.vencedorFinal||'';
-      const total=Object.keys(data.players).length; const jaEsta=!!data.players[jogadorId]; if(!jaEsta && total>=data.limiteJogadores) throw new Error('Sala cheia para esse modo.');
-      data.players[jogadorId]={nome}; if(data.prontos[jogadorId]===undefined) data.prontos[jogadorId]=false; t.set(ref,data);
-    });
-    document.getElementById('espera').style.display='block'; ouvirSala(); debug(`Entrou na sala ${salaId} como ${nome} (${jogadorId})`);
-  }catch(e){ mostrarErro(e.message||'Não foi possível entrar.'); }
+    mostrarErro(''); nome=document.getElementById('nome').value.trim(); salaId=document.getElementById('sala').value.trim(); const modo=document.getElementById('modo').value; if(!nome||!salaId){mostrarErro('Preencha nome e código da sala.'); return;}
+    const ref=db.collection('salas').doc(salaId); const snap=await ref.get();
+    if(!snap.exists){await ref.set({players:{},prontos:{},gameStarted:false,modo,limiteJogadores:modo==='1x1'?2:4,hands:{},mesa:[],ultimaMesa:[],turno:0,pontos:{A:0,B:0},trucoValor:1,trucoPedidoPorUltimo:'',trucoAceitoPor:'',rodada:1,rodadas:[],vira:'',manilha:'',trucoPendente:false,trucoPedidoPor:'',trucoProposto:null,maoInicialTime:'A',ultimoVencedor:'',turnStartedAt:null,partidaEncerrada:false,vencedorFinal:'',starterIndex:0,maoDeOnzePendente:false,maoDeOnzeTime:'',maoDeOnzeAtiva:false,escuroAtivo:false});}
+    await db.runTransaction(async t=>{const doc=await t.get(ref); const d=doc.data()||{}; d.players=d.players||{}; d.prontos=d.prontos||{}; d.hands=d.hands||{}; d.mesa=d.mesa||[]; d.ultimaMesa=d.ultimaMesa||[]; d.modo=d.modo||modo; d.limiteJogadores=d.limiteJogadores||(d.modo==='1x1'?2:4); d.pontos=d.pontos||{A:0,B:0}; if(d.turno===undefined)d.turno=0; d.rodadas=d.rodadas||[]; d.trucoValor=d.trucoValor||1; d.trucoPedidoPorUltimo=d.trucoPedidoPorUltimo||''; d.trucoAceitoPor=d.trucoAceitoPor||''; d.rodada=d.rodada||1; d.vira=d.vira||''; d.manilha=d.manilha||''; if(d.trucoPendente===undefined)d.trucoPendente=false; d.trucoPedidoPor=d.trucoPedidoPor||''; if(d.trucoProposto===undefined)d.trucoProposto=null; d.maoInicialTime=d.maoInicialTime||'A'; d.ultimoVencedor=d.ultimoVencedor||''; if(d.partidaEncerrada===undefined)d.partidaEncerrada=false; d.vencedorFinal=d.vencedorFinal||''; if(d.starterIndex===undefined)d.starterIndex=0; if(d.maoDeOnzePendente===undefined)d.maoDeOnzePendente=false; d.maoDeOnzeTime=d.maoDeOnzeTime||''; if(d.maoDeOnzeAtiva===undefined)d.maoDeOnzeAtiva=false; if(d.escuroAtivo===undefined)d.escuroAtivo=false; const total=Object.keys(d.players).length; const ja=!!d.players[jogadorId]; if(!ja&&total>=d.limiteJogadores) throw new Error('Sala cheia para esse modo.'); d.players[jogadorId]={nome}; if(d.prontos[jogadorId]===undefined)d.prontos[jogadorId]=false; t.set(ref,d);});
+    document.getElementById('espera').style.display='block'; ouvirSala();
+  }catch(e){mostrarErro(e.message||'Não foi possível entrar.');}
 }
 
-async function ficarPronto(){
-  try{
-    if(!salaId){ mostrarErro('Entre em uma sala primeiro.'); return; }
-    const ref=db.collection('salas').doc(salaId);
-    await db.runTransaction(async t=>{ const doc=await t.get(ref); const data=doc.data()||{}; data.prontos=data.prontos||{}; data.prontos[jogadorId]=true; t.update(ref,{prontos:data.prontos}); });
-  }catch(e){ mostrarErro(e.message||'Não foi possível marcar pronto.'); }
+async function ficarPronto(){try{if(!salaId){mostrarErro('Entre em uma sala primeiro.'); return;} const ref=db.collection('salas').doc(salaId); await db.runTransaction(async t=>{const doc=await t.get(ref); const d=doc.data()||{}; d.prontos=d.prontos||{}; d.prontos[jogadorId]=true; t.update(ref,{prontos:d.prontos});});}catch(e){mostrarErro(e.message||'Não foi possível marcar pronto.');}}
+
+function prepararEstadoNovaMao(d, players){
+  const ids=idsOrdenados(players||d.players||{}); if(ids.length===0) return;
+  d.starterIndex=(d.starterIndex===undefined?0:d.starterIndex)%ids.length;
+  const starterId=ids[d.starterIndex];
+  const deck=embaralhar(BARALHO); const hands={}; for(let i=0;i<ids.length;i++) hands[ids[i]]=deck.splice(0,3);
+  d.hands=hands; d.mesa=[]; d.ultimaMesa=[]; d.turno=d.starterIndex; d.trucoValor=1; d.trucoPedidoPorUltimo=''; d.trucoAceitoPor=''; d.rodada=1; d.rodadas=[]; d.vira=deck.pop(); d.manilha=definirManilha(d.vira); d.trucoPendente=false; d.trucoPedidoPor=''; d.trucoProposto=null; d.maoInicialTime=starterTimeFromIndex(d.starterIndex); d.turnStartedAt=Date.now(); d.maoDeOnzePendente=false; d.maoDeOnzeTime=''; d.maoDeOnzeAtiva=false; d.escuroAtivo=false;
+  const a=d.pontos?.A||0, b=d.pontos?.B||0;
+  if(a===11 && b===11){ d.escuroAtivo=true; d.trucoValor=3; }
+  else if(a===11 || b===11){ d.maoDeOnzePendente=true; d.maoDeOnzeTime=a===11?'A':'B'; d.trucoValor=3; }
 }
 
 async function iniciarPartidaSeNecessario(data){
-  const ref=db.collection('salas').doc(salaId); const limite=data.limiteJogadores||2; const total=Object.keys(data.players||{}).length; const totalProntos=Object.values(data.prontos||{}).filter(Boolean).length;
-  if(total===limite && totalProntos===limite && !data.gameStarted){
-    await db.runTransaction(async t=>{
-      const doc=await t.get(ref); const d=doc.data()||{}; if(d.gameStarted) return;
-      const jogadores=idsOrdenados(d.players||{}); const deck=embaralhar(BARALHO); const hands={};
-      for(let i=0;i<jogadores.length;i++) hands[jogadores[i]]=deck.splice(0,3);
-      const vira=deck.pop(); const manilha=definirManilha(vira);
-      t.update(ref,{gameStarted:true,hands,mesa:[],ultimaMesa:[],turno:0,pontos:d.pontos||{A:0,B:0},trucoValor:1,trucoPedidoPorUltimo:'',trucoAceitoPor:'',rodada:1,rodadas:[],ultimoVencedor:'',vira,manilha,trucoPendente:false,trucoPedidoPor:'',trucoProposto:null,maoInicialTime:'A',turnStartedAt:firebase.firestore.FieldValue.serverTimestamp(),partidaEncerrada:false,vencedorFinal:''});
-    });
+  const ref=db.collection('salas').doc(salaId); const limite=data.limiteJogadores||2; const total=Object.keys(data.players||{}).length; const prontos=Object.values(data.prontos||{}).filter(Boolean).length;
+  if(total===limite && prontos===limite && !data.gameStarted){
+    await db.runTransaction(async t=>{const doc=await t.get(ref); const d=doc.data()||{}; if(d.gameStarted) return; prepararEstadoNovaMao(d,d.players||{}); d.gameStarted=true; d.partidaEncerrada=false; d.vencedorFinal=''; t.set(ref,d);});
   }
 }
 
-function prepararNovaMao(data,vencedorTime=null){
-  const players=data.players||{}; const ids=idsOrdenados(players); const deck=embaralhar(BARALHO); const hands={};
-  for(let i=0;i<ids.length;i++) hands[ids[i]]=deck.splice(0,3);
-  const vira=deck.pop(); const manilha=definirManilha(vira);
-  data.hands=hands; data.mesa=[]; data.ultimaMesa=[]; data.turno=0; data.trucoValor=1; data.trucoPedidoPorUltimo=''; data.trucoAceitoPor=''; data.rodada=1; data.rodadas=[];
-  data.vira=vira; data.manilha=manilha; data.trucoPendente=false; data.trucoPedidoPor=''; data.trucoProposto=null; data.maoInicialTime=vencedorTime||data.maoInicialTime||'A'; data.turnStartedAt=Date.now();
-  if(vencedorTime) data.ultimoVencedor=`${nomeDoTime(players,vencedorTime)} venceu a mão`;
-  if((data.pontos?.A||0)>=12 || (data.pontos?.B||0)>=12){ data.partidaEncerrada=true; const final=(data.pontos?.A||0)>=12?'A':'B'; data.vencedorFinal=nomeDoTime(players,final); }
+function finalizarPartidaSePreciso(d){ if((d.pontos?.A||0)>=12||(d.pontos?.B||0)>=12){ d.partidaEncerrada=true; const final=(d.pontos?.A||0)>=12?'A':'B'; d.vencedorFinal=nomeDoTime(d.players||{},final); } }
+
+function avancarParaProximaMao(d,vencedorTime){
+  if(vencedorTime){ d.ultimoVencedor=`${nomeDoTime(d.players||{},vencedorTime)} ganhou a mão`; }
+  d.starterIndex=((d.starterIndex===undefined?0:d.starterIndex)+1)%idsOrdenados(d.players||{}).length;
+  finalizarPartidaSePreciso(d); if(d.partidaEncerrada) return; prepararEstadoNovaMao(d,d.players||{});
+}
+
+async function resolverMaoDeOnze(decisao){
+  try{
+    const ref=db.collection('salas').doc(salaId);
+    await db.runTransaction(async t=>{const doc=await t.get(ref); const d=doc.data()||{}; const players=d.players||{}; if(!d.maoDeOnzePendente) throw new Error('Não há mão de 11 pendente.'); if(timeDoJogador(players,jogadorId)!==d.maoDeOnzeTime) throw new Error('Só o time com 11 decide.');
+      if(decisao==='correr'){ const adv=d.maoDeOnzeTime==='A'?'B':'A'; d.pontos[adv]=Math.min(12,(d.pontos[adv]||0)+1); d.ultimoVencedor=`${nomeDoTime(players,d.maoDeOnzeTime)} correu a mão de 11. ${nomeDoTime(players,adv)} ganhou 1 ponto.`; d.maoDeOnzePendente=false; finalizarPartidaSePreciso(d); if(!d.partidaEncerrada){ d.starterIndex=((d.starterIndex===undefined?0:d.starterIndex)+1)%idsOrdenados(players).length; prepararEstadoNovaMao(d,players);} }
+      else { d.maoDeOnzePendente=false; d.maoDeOnzeAtiva=true; d.trucoValor=3; d.ultimoVencedor=`${nomeDoTime(players,d.maoDeOnzeTime)} foi para a mão de 11. Vale 3 pontos.`; }
+      t.set(ref,d);
+    });
+  }catch(e){ mostrarErro(e.message||'Não foi possível decidir a mão de 11.'); }
 }
 
 async function jogarCartaInterna(carta,encoberta=false){
   try{
     const ref=db.collection('salas').doc(salaId);
     await db.runTransaction(async t=>{
-      const doc=await t.get(ref); const data=doc.data()||{}; const players=data.players||{}; const ids=idsOrdenados(players);
-      if(!data.gameStarted) throw new Error('A partida ainda não começou.');
-      if(data.partidaEncerrada) throw new Error('A partida já acabou.');
-      if(data.trucoPendente) throw new Error('Responda ao truco antes de jogar.');
-      if(ids[data.turno]!==jogadorId) throw new Error('Não é sua vez.');
-      if(!data.hands?.[jogadorId]?.includes(carta)) throw new Error('Carta inválida.');
-      data.hands[jogadorId]=data.hands[jogadorId].filter(c=>c!==carta);
-      data.mesa=data.mesa||[];
-      data.mesa.push({jogador:jogadorId,carta:encoberta?'🂠':carta,real:carta,encoberta:!!encoberta});
-      data.turno=(data.turno+1)%ids.length; data.turnStartedAt=Date.now();
-      const necessarias=data.modo==='1x1'?2:4;
-      if(data.mesa.length>=necessarias){
-        let maior=forcaCarta(data.mesa[0].real||data.mesa[0].carta,data.manilha); let vencedores=[data.mesa[0]];
-        for(let i=1;i<data.mesa.length;i++){
-          const atual=forcaCarta(data.mesa[i].real||data.mesa[i].carta,data.manilha);
-          if(atual>maior){ maior=atual; vencedores=[data.mesa[i]]; }
-          else if(atual===maior){ vencedores.push(data.mesa[i]); }
-        }
-        const empate=vencedores.length>1; data.rodadas=data.rodadas||[];
-        if(empate){ data.rodadas.push('E'); data.ultimoVencedor='Rodada empatou (canga)'; }
-        else { const vencedor=vencedores[0]; const time=timeDoJogador(players,vencedor.jogador); data.rodadas.push(time); data.ultimoVencedor=`${players[vencedor.jogador]?.nome||'Jogador'} venceu a rodada`; data.turno=ids.indexOf(vencedor.jogador); data.turnStartedAt=Date.now(); }
-        data.ultimaMesa=[...data.mesa]; data.mesa=[]; data.rodada=(data.rodada||1)+1;
-        const vencedorMao=decidirVencedorDaMao(data.rodadas,data.maoInicialTime||'A');
-        if(vencedorMao){ data.pontos=data.pontos||{A:0,B:0}; data.pontos[vencedorMao]=Math.min(12,(data.pontos[vencedorMao]||0)+(data.trucoValor||1)); data.ultimoVencedor=`${nomeDoTime(players,vencedorMao)} ganhou a mão`; prepararNovaMao(data,vencedorMao); }
+      const doc=await t.get(ref); const d=doc.data()||{}; const players=d.players||{}; const ids=idsOrdenados(players);
+      if(!d.gameStarted) throw new Error('A partida ainda não começou.'); if(d.partidaEncerrada) throw new Error('A partida já acabou.'); if(d.maoDeOnzePendente) throw new Error('Decidam a mão de 11 primeiro.'); if(d.trucoPendente) throw new Error('Responda ao truco antes de jogar.'); if(ids[d.turno]!==jogadorId) throw new Error('Não é sua vez.'); if(!d.hands?.[jogadorId]?.includes(carta)) throw new Error('Carta inválida.');
+      if(encoberta && d.mesa.length>0){ const ultimo=d.mesa[d.mesa.length-1]; const timeUltimo=timeDoJogador(players,ultimo.jogador); const meu=timeDoJogador(players,jogadorId); if(timeUltimo!==meu){ d.pontos[timeUltimo]=Math.min(12,(d.pontos[timeUltimo]||0)+(d.trucoValor||1)); d.ultimaMesa=[...d.mesa,{jogador:jogadorId,carta:'🂠',real:carta,encoberta:true}]; d.ultimoVencedor=`${players[jogadorId]?.nome||'Jogador'} encobriu. ${nomeDoTime(players,timeUltimo)} ganhou a mão.`; d.hands[jogadorId]=d.hands[jogadorId].filter(c=>c!==carta); avancarParaProximaMao(d,timeUltimo); t.set(ref,d); return; }}
+      d.hands[jogadorId]=d.hands[jogadorId].filter(c=>c!==carta); d.mesa=d.mesa||[]; d.mesa.push({jogador:jogadorId,carta:encoberta?'🂠':carta,real:carta,encoberta:!!encoberta}); d.turno=(d.turno+1)%ids.length; d.turnStartedAt=Date.now();
+      const necessarias=d.modo==='1x1'?2:4;
+      if(d.mesa.length>=necessarias){ let maior=forcaCarta(d.mesa[0].real||d.mesa[0].carta,d.manilha); let vencedores=[d.mesa[0]]; for(let i=1;i<d.mesa.length;i++){ const atual=forcaCarta(d.mesa[i].real||d.mesa[i].carta,d.manilha); if(atual>maior){maior=atual; vencedores=[d.mesa[i]];} else if(atual===maior){vencedores.push(d.mesa[i]);}}
+        const empate=vencedores.length>1; d.rodadas=d.rodadas||[]; if(empate){ d.rodadas.push('E'); d.ultimoVencedor='Rodada empatou (canga)'; } else { const vencedor=vencedores[0]; const time=timeDoJogador(players,vencedor.jogador); d.rodadas.push(time); d.ultimoVencedor=`${players[vencedor.jogador]?.nome||'Jogador'} venceu a rodada`; d.turno=ids.indexOf(vencedor.jogador); d.turnStartedAt=Date.now(); }
+        d.ultimaMesa=[...d.mesa]; d.mesa=[]; d.rodada=(d.rodada||1)+1; const vencedorMao=decidirVencedorDaMao(d.rodadas,d.maoInicialTime||'A'); if(vencedorMao){ d.pontos[vencedorMao]=Math.min(12,(d.pontos[vencedorMao]||0)+(d.trucoValor||1)); avancarParaProximaMao(d,vencedorMao); }
       }
-      t.set(ref,data);
-    });
-    cartaSelecionada=null;
+      t.set(ref,d);
+    }); cartaSelecionada=null;
   }catch(e){ mostrarErro(e.message||'Não foi possível jogar a carta.'); }
 }
 
-async function jogarCartaSelecionada(){ if(!cartaSelecionada){ mostrarErro('Selecione uma carta primeiro.'); return; } await jogarCartaInterna(cartaSelecionada,false); }
-async function encobrirCartaSelecionada(){ if(!cartaSelecionada){ mostrarErro('Selecione uma carta primeiro.'); return; } await jogarCartaInterna(cartaSelecionada,true); }
+async function jogarCartaSelecionada(){ if(!cartaSelecionada){mostrarErro('Selecione uma carta primeiro.'); return;} await jogarCartaInterna(cartaSelecionada,false); }
+async function encobrirCartaSelecionada(){ if(!cartaSelecionada){mostrarErro('Selecione uma carta primeiro.'); return;} await jogarCartaInterna(cartaSelecionada,true); }
 
-async function pedirTruco(){
-  try{
-    const ref=db.collection('salas').doc(salaId);
-    await db.runTransaction(async t=>{
-      const doc=await t.get(ref); const data=doc.data()||{}; const players=data.players||{}; const ids=idsOrdenados(players);
-      if(!data.gameStarted) throw new Error('A partida ainda não começou.');
-      if(data.partidaEncerrada) throw new Error('A partida já acabou.');
-      if(data.trucoPendente) throw new Error('Já existe um truco pendente.');
-      if(ids[data.turno]!==jogadorId) throw new Error('Só quem está na vez pode pedir.');
-      if((data.trucoValor||1)>=12) throw new Error('A mão já está valendo 12.');
-      if(!podePedirAumento(data)) throw new Error('Agora só quem aceitou a última aposta pode aumentar.');
-      const proximo=proximoValorTruco(data.trucoValor||1); data.trucoPendente=true; data.trucoPedidoPor=jogadorId; data.trucoProposto=proximo; data.ultimoVencedor=`${players[jogadorId]?.nome||'Jogador'} pediu ${proximo===3?'TRUCO':proximo}`; t.set(ref,data);
-    });
-  }catch(e){ mostrarErro(e.message||'Não foi possível pedir truco.'); }
-}
+async function pedirTruco(){ try{ const ref=db.collection('salas').doc(salaId); await db.runTransaction(async t=>{const doc=await t.get(ref); const d=doc.data()||{}; const players=d.players||{}; const ids=idsOrdenados(players); if(!d.gameStarted) throw new Error('A partida ainda não começou.'); if(d.partidaEncerrada) throw new Error('A partida já acabou.'); if(d.maoDeOnzePendente||d.maoDeOnzeAtiva||d.escuroAtivo) throw new Error('Não pode pedir truco nessa mão.'); if(d.trucoPendente) throw new Error('Já existe um truco pendente.'); if(ids[d.turno]!==jogadorId) throw new Error('Só quem está na vez pode pedir.'); if((d.trucoValor||1)>=12) throw new Error('A mão já está valendo 12.'); if(!podePedirAumento(d)) throw new Error('Agora só quem aceitou a última aposta pode aumentar.'); const p=proximoValorTruco(d.trucoValor||1); d.trucoPendente=true; d.trucoPedidoPor=jogadorId; d.trucoProposto=p; d.ultimoVencedor=`${players[jogadorId]?.nome||'Jogador'} pediu ${p===3?'TRUCO':p}`; t.set(ref,d); }); }catch(e){ mostrarErro(e.message||'Não foi possível pedir truco.'); }}
+async function aceitarTruco(){ try{ const ref=db.collection('salas').doc(salaId); await db.runTransaction(async t=>{const doc=await t.get(ref); const d=doc.data()||{}; const players=d.players||{}; if(!d.trucoPendente) throw new Error('Não há truco pendente.'); if(d.trucoPedidoPor===jogadorId) throw new Error('Quem pediu não pode aceitar.'); if(timeDoJogador(players,d.trucoPedidoPor)===timeDoJogador(players,jogadorId)) throw new Error('Só o adversário pode aceitar o truco.'); d.trucoValor=d.trucoProposto||d.trucoValor||1; d.trucoAceitoPor=jogadorId; d.trucoPedidoPorUltimo=d.trucoPedidoPor||''; d.trucoPendente=false; d.trucoPedidoPor=''; d.trucoProposto=null; d.ultimoVencedor=`${players[jogadorId]?.nome||'Jogador'} aceitou. A mão agora vale ${d.trucoValor}.`; t.set(ref,d); }); }catch(e){ mostrarErro(e.message||'Não foi possível aceitar.'); }}
+async function correrTruco(){ try{ const ref=db.collection('salas').doc(salaId); await db.runTransaction(async t=>{const doc=await t.get(ref); const d=doc.data()||{}; const players=d.players||{}; if(!d.trucoPendente) throw new Error('Não há truco pendente.'); if(d.trucoPedidoPor===jogadorId) throw new Error('Quem pediu não pode correr.'); if(timeDoJogador(players,d.trucoPedidoPor)===timeDoJogador(players,jogadorId)) throw new Error('Só o adversário pode correr.'); const timePediu=timeDoJogador(players,d.trucoPedidoPor); d.pontos[timePediu]=Math.min(12,(d.pontos[timePediu]||0)+(d.trucoValor||1)); d.ultimoVencedor=`${players[jogadorId]?.nome||'Jogador'} correu. ${nomeDoTime(players,timePediu)} ganhou a mão e pontuou.`; avancarParaProximaMao(d,timePediu); t.set(ref,d); }); }catch(e){ mostrarErro(e.message||'Não foi possível correr.'); }}
 
-async function aceitarTruco(){
-  try{
-    const ref=db.collection('salas').doc(salaId);
-    await db.runTransaction(async t=>{
-      const doc=await t.get(ref); const data=doc.data()||{}; const players=data.players||{};
-      if(!data.trucoPendente) throw new Error('Não há truco pendente.');
-      if(data.trucoPedidoPor===jogadorId) throw new Error('Quem pediu não pode aceitar.');
-      if(timeDoJogador(players,data.trucoPedidoPor)===timeDoJogador(players,jogadorId)) throw new Error('Só o adversário pode aceitar o truco.');
-      data.trucoValor=data.trucoProposto||data.trucoValor||1; data.trucoAceitoPor=jogadorId; data.trucoPedidoPorUltimo=data.trucoPedidoPor||''; data.trucoPendente=false; data.trucoPedidoPor=''; data.trucoProposto=null; data.ultimoVencedor=`${players[jogadorId]?.nome||'Jogador'} aceitou. A mão agora vale ${data.trucoValor}.`; t.set(ref,data);
-    });
-  }catch(e){ mostrarErro(e.message||'Não foi possível aceitar.'); }
-}
-
-async function correrTruco(){
-  try{
-    const ref=db.collection('salas').doc(salaId);
-    await db.runTransaction(async t=>{
-      const doc=await t.get(ref); const data=doc.data()||{}; const players=data.players||{};
-      if(!data.trucoPendente) throw new Error('Não há truco pendente.');
-      if(data.trucoPedidoPor===jogadorId) throw new Error('Quem pediu não pode correr.');
-      if(timeDoJogador(players,data.trucoPedidoPor)===timeDoJogador(players,jogadorId)) throw new Error('Só o adversário pode correr.');
-      const timePediu=timeDoJogador(players,data.trucoPedidoPor); data.pontos=data.pontos||{A:0,B:0}; data.pontos[timePediu]=Math.min(12,(data.pontos[timePediu]||0)+(data.trucoValor||1)); data.ultimoVencedor=`${players[jogadorId]?.nome||'Jogador'} correu. ${nomeDoTime(players,timePediu)} ganhou a mão e pontuou.`; prepararNovaMao(data,timePediu); t.set(ref,data);
-    });
-  }catch(e){ mostrarErro(e.message||'Não foi possível correr.'); }
-}
-
-async function tentarAutoJogar(data){
-  if(autoPlayLock) return;
-  const players=data.players||{}; const ids=idsOrdenados(players); const minhaVez=ids[data.turno]===jogadorId; const tempo=tempoRestante(data);
-  if(!data.gameStarted || data.partidaEncerrada || data.trucoPendente || !minhaVez || tempo>0) return;
-  const mao=(data.hands&&data.hands[jogadorId])||[];
-  if(mao.length===0) return;
-  autoPlayLock=true;
-  const aleatoria=mao[Math.floor(Math.random()*mao.length)];
-  try{ await jogarCartaInterna(aleatoria,false); } finally { setTimeout(()=>autoPlayLock=false,800); }
-}
+async function tentarAutoJogar(data){ if(autoPlayLock) return; const players=data.players||{}; const ids=idsOrdenados(players); const minhaVez=ids[data.turno]===jogadorId; const tempo=tempoRestante(data); if(!data.gameStarted||data.partidaEncerrada||data.trucoPendente||data.maoDeOnzePendente||!minhaVez||tempo>0) return; const mao=(data.hands&&data.hands[jogadorId])||[]; if(mao.length===0) return; autoPlayLock=true; try{ await jogarCartaInterna(mao[Math.floor(Math.random()*mao.length)],false); } finally { setTimeout(()=>autoPlayLock=false,800); }}
 
 function renderJogo(data){
-  const players=data.players||{}; const ids=idsOrdenados(players); const meuTime=timeDoJogador(players,jogadorId); const mao=(data.hands&&data.hands[jogadorId])||[];
-  const mesa=(data.mesa&&data.mesa.length>0)?data.mesa:(data.ultimaMesa||[]); const nomeTurno=players[ids[data.turno]]?.nome||'-'; const minhaVez=ids[data.turno]===jogadorId;
-  const pedidoPorOutro=data.trucoPendente&&data.trucoPedidoPor!==jogadorId; const podeResponder=pedidoPorOutro&&timeDoJogador(players,data.trucoPedidoPor)!==timeDoJogador(players,jogadorId); const encerrada=fimDePartida(data);
-
+  const players=data.players||{}; const ids=idsOrdenados(players); const meuTime=timeDoJogador(players,jogadorId); const mao=(data.hands&&data.hands[jogadorId])||[]; const mesa=(data.mesa&&data.mesa.length>0)?data.mesa:(data.ultimaMesa||[]); const nomeTurno=players[ids[data.turno]]?.nome||'-'; const minhaVez=ids[data.turno]===jogadorId; const pedidoPorOutro=data.trucoPendente&&data.trucoPedidoPor!==jogadorId; const podeResponder=pedidoPorOutro&&timeDoJogador(players,data.trucoPedidoPor)!==timeDoJogador(players,jogadorId); const encerrada=fimDePartida(data);
   document.getElementById('placar').textContent=placarComNomes(players,data.pontos);
   document.getElementById('turnoInfo').textContent=minhaVez?`É sua vez`:`Vez de ${nomeTurno}`;
   document.getElementById('rodadaInfo').textContent=`Rodada: ${data.rodada||1}`;
-  document.getElementById('trucoInfo').textContent=`Mão valendo: ${data.trucoValor||1}`;
-  document.getElementById('statusJogo').textContent=data.ultimoVencedor||'Jogo em andamento';
-  document.getElementById('viraCarta').textContent=data.vira||'?';
-  document.getElementById('manilhaInfo').textContent=`Manilha: ${data.manilha||'-'}`;
+  document.getElementById('trucoInfo').textContent=data.escuroAtivo?`Modo escuro • mão vale 3`:(data.maoDeOnzePendente||data.maoDeOnzeAtiva?`Mão de 11 • vale 3`:`Mão valendo: ${data.trucoValor||1}`);
   document.getElementById('timerInfo').textContent=`Tempo: ${tempoRestante(data)}s`;
-  document.getElementById('timeInfo').textContent=meuTime;
-
-  const fimEl=document.getElementById('fimPartida');
-  if(encerrada){ fimEl.style.display='block'; fimEl.textContent=`🏆 Partida encerrada — vencedor: ${data.vencedorFinal || ((data.pontos?.A||0)>=12?nomeDoTime(players,'A'):nomeDoTime(players,'B'))}`; }
-  else { fimEl.style.display='none'; fimEl.textContent=''; }
+  document.getElementById('statusJogo').textContent=data.ultimoVencedor||'Jogo em andamento';
+  document.getElementById('viraCarta').textContent=data.vira||'?'; document.getElementById('manilhaInfo').textContent=`Manilha: ${data.manilha||'-'}`; document.getElementById('timeInfo').textContent=meuTime;
+  const fimEl=document.getElementById('fimPartida'); if(encerrada){ fimEl.style.display='block'; fimEl.textContent=`🏆 Partida encerrada — vencedor: ${data.vencedorFinal || ((data.pontos?.A||0)>=12?nomeDoTime(players,'A'):nomeDoTime(players,'B'))}`; } else { fimEl.style.display='none'; fimEl.textContent=''; }
 
   const seats=seatsParaJogadores(players);
-  const setSeat=(seatId,nameId,previewId,pid)=>{
-    const seat=document.getElementById(seatId); const nameEl=document.getElementById(nameId);
-    if(!pid||!players[pid]){ seat.style.display='none'; nameEl.textContent=''; renderPreview(previewId,0); return; }
-    seat.style.display='flex'; nameEl.textContent=players[pid].nome; renderPreview(previewId,((data.hands&&data.hands[pid])||[]).length);
-  };
-  setSeat('seatTop','nameTop','previewTop',seats.top);
-  setSeat('seatLeft','nameLeft','previewLeft',seats.left);
-  setSeat('seatRight','nameRight','previewRight',seats.right);
-  document.getElementById('nameBottom').textContent=players[seats.bottom]?.nome||'Você';
+  const setSeat=(seatId,nameId,previewId,pid)=>{ const seat=document.getElementById(seatId), nameEl=document.getElementById(nameId); if(!pid||!players[pid]){ seat.style.display='none'; nameEl.textContent=''; renderPreview(previewId,0); return; } seat.style.display='flex'; nameEl.textContent=players[pid].nome; let count=((data.hands&&data.hands[pid])||[]).length; renderPreview(previewId,count); };
+  setSeat('seatTop','nameTop','previewTop',seats.top); setSeat('seatLeft','nameLeft','previewLeft',seats.left); setSeat('seatRight','nameRight','previewRight',seats.right); document.getElementById('nameBottom').textContent=players[seats.bottom]?.nome||'Você';
 
-  const rounds=document.getElementById('resumoRodadas'); rounds.innerHTML='';
-  (data.rodadas||[]).forEach((r,idx)=>{ const b=document.createElement('div'); b.className='round-badge'; b.textContent=r==='E'?`R${idx+1}: E`:`R${idx+1}: ${r}`; rounds.appendChild(b); });
-  if((data.rodadas||[]).length===0) rounds.innerHTML="<div class='round-badge'>Sem resultado</div>";
+  const rounds=document.getElementById('resumoRodadas'); rounds.innerHTML=''; (data.rodadas||[]).forEach((r,idx)=>{ const b=document.createElement('div'); b.className='round-badge'; b.textContent=`R${idx+1}: ${nomeRodada(players,r)}`; rounds.appendChild(b); }); if((data.rodadas||[]).length===0) rounds.innerHTML="<div class='round-badge'>Sem resultado</div>";
 
-  document.getElementById('playedTop').innerHTML=''; document.getElementById('playedLeft').innerHTML=''; document.getElementById('playedRight').innerHTML=''; document.getElementById('playedBottom').innerHTML='';
-  const posPorJogador={}; if(seats.top) posPorJogador[seats.top]='playedTop'; if(seats.left) posPorJogador[seats.left]='playedLeft'; if(seats.right) posPorJogador[seats.right]='playedRight'; if(seats.bottom) posPorJogador[seats.bottom]='playedBottom';
-  mesa.forEach(item=>{
-    const wrap=document.createElement('div'); wrap.className='card-wrap';
-    const nm=document.createElement('div'); nm.className='card-name'; nm.textContent=players[item.jogador]?.nome||'Jogador';
-    const cd=document.createElement('div'); cd.className='card small'+(item.encoberta?' back':''); cd.textContent=item.carta;
-    wrap.appendChild(nm); wrap.appendChild(cd);
-    const target=posPorJogador[item.jogador]; if(target) document.getElementById(target).appendChild(wrap);
-  });
+  ['Top','Left','Right','Bottom'].forEach(s=>document.getElementById('played'+s).innerHTML=''); const pos={}; if(seats.top) pos[seats.top]='playedTop'; if(seats.left) pos[seats.left]='playedLeft'; if(seats.right) pos[seats.right]='playedRight'; if(seats.bottom) pos[seats.bottom]='playedBottom';
+  mesa.forEach(item=>{ const wrap=document.createElement('div'); wrap.className='card-wrap'; const nm=document.createElement('div'); nm.className='card-name'; nm.textContent=players[item.jogador]?.nome||'Jogador'; const cd=document.createElement('div'); cd.className='card small'+(item.encoberta?' back':''); cd.textContent=item.carta; wrap.appendChild(nm); wrap.appendChild(cd); const target=pos[item.jogador]; if(target) document.getElementById(target).appendChild(wrap); });
+
+  const maoOnzeBloco=document.getElementById('maoOnzeBloco'); const maoOnzeTexto=document.getElementById('maoOnzeTexto'); const meuTimeTem11=timeDoJogador(players,jogadorId)===data.maoDeOnzeTime;
+  if(data.maoDeOnzePendente && meuTimeTem11){ maoOnzeBloco.style.display='block'; maoOnzeTexto.textContent=`${nomeDoTime(players,data.maoDeOnzeTime)} decide se joga valendo 3 ou corre.`; } else { maoOnzeBloco.style.display='none'; maoOnzeTexto.textContent=''; }
 
   const maoDiv=document.getElementById('maoCartas'); maoDiv.innerHTML='';
-  mao.forEach(c=>{
-    const card=document.createElement('div');
-    card.className='card selectable'+(cartaSelecionada===c?' selected':'')+((data.trucoPendente||!minhaVez||encerrada)?' disabled':'');
-    card.textContent=c;
-    if(!(data.trucoPendente||!minhaVez||encerrada)) card.addEventListener('click',()=>{ cartaSelecionada=(cartaSelecionada===c)?null:c; renderJogo(data); });
+  const mostrarFacesParceiro = data.maoDeOnzePendente && data.modo==='2x2' && meuTimeTem11 && !data.escuroAtivo;
+  const escuro = data.escuroAtivo;
+  mao.forEach((c,idx)=>{ const card=document.createElement('div'); const mostrarFace=!escuro; card.className='card selectable'+(cartaSelecionada===c?' selected':'')+((data.trucoPendente||!minhaVez||encerrada||data.maoDeOnzePendente)?' disabled':''); if(mostrarFace) card.textContent=c; else { card.textContent='🂠'; card.classList.add('back'); }
+    if(!(data.trucoPendente||!minhaVez||encerrada||data.maoDeOnzePendente)) card.addEventListener('click',()=>{ cartaSelecionada=(cartaSelecionada===c)?null:c; renderJogo(data); });
     maoDiv.appendChild(card);
   });
 
-  document.getElementById('btnAceitar').style.display=podeResponder?'inline-block':'none';
-  document.getElementById('btnCorrer').style.display=podeResponder?'inline-block':'none';
-  const btnTruco=document.getElementById('btnTruco'); const podeAumentar=podePedirAumento(data);
-  let nomeBotao='Pedir Truco'; if((data.trucoValor||1)===3) nomeBotao='Pedir 6'; if((data.trucoValor||1)===6) nomeBotao='Pedir 9'; if((data.trucoValor||1)===9) nomeBotao='Pedir 12'; if((data.trucoValor||1)>=12) nomeBotao='Máximo 12';
-  btnTruco.textContent=nomeBotao; btnTruco.disabled=!!data.trucoPendente||(data.trucoValor||1)>=12||!minhaVez||!podeAumentar||encerrada;
-  document.getElementById('btnJogarSelecionada').disabled=!cartaSelecionada||!minhaVez||!!data.trucoPendente||encerrada;
-  document.getElementById('btnEncobrir').disabled=!cartaSelecionada||!minhaVez||!!data.trucoPendente||encerrada;
-  document.getElementById('btnAceitar').disabled=!podeResponder||encerrada;
-  document.getElementById('btnCorrer').disabled=!podeResponder||encerrada;
+  if(mostrarFacesParceiro && data.modo==='2x2'){
+    const ids2=idsOrdenados(players); const meuIdx=ids2.indexOf(jogadorId); const parceiroId=ids2[(meuIdx+2)%4]; const parceiroMao=(data.hands&&data.hands[parceiroId])||[]; parceiroMao.forEach(c=>{ const card=document.createElement('div'); card.className='card back'; card.textContent=c; maoDiv.appendChild(card); });
+  }
 
+  document.getElementById('btnAceitar').style.display=podeResponder?'inline-block':'none'; document.getElementById('btnCorrer').style.display=podeResponder?'inline-block':'none';
+  const btnTruco=document.getElementById('btnTruco'); const podeAumentar=podePedirAumento(data); let nomeBotao='Pedir Truco'; if((data.trucoValor||1)===3) nomeBotao='Pedir 6'; if((data.trucoValor||1)===6) nomeBotao='Pedir 9'; if((data.trucoValor||1)===9) nomeBotao='Pedir 12'; if((data.trucoValor||1)>=12) nomeBotao='Máximo 12'; btnTruco.textContent=nomeBotao; btnTruco.disabled=!!data.trucoPendente||(data.trucoValor||1)>=12||!minhaVez||!podeAumentar||encerrada||data.maoDeOnzePendente||data.maoDeOnzeAtiva||data.escuroAtivo;
+  document.getElementById('btnJogarSelecionada').disabled=!cartaSelecionada||!minhaVez||!!data.trucoPendente||encerrada||data.maoDeOnzePendente; document.getElementById('btnEncobrir').disabled=!cartaSelecionada||!minhaVez||!!data.trucoPendente||encerrada||data.maoDeOnzePendente; document.getElementById('btnAceitar').disabled=!podeResponder||encerrada; document.getElementById('btnCorrer').disabled=!podeResponder||encerrada;
+  document.getElementById('btnMaoOnzeJogar').disabled=!(data.maoDeOnzePendente&&meuTimeTem11); document.getElementById('btnMaoOnzeCorrer').disabled=!(data.maoDeOnzePendente&&meuTimeTem11);
   tentarAutoJogar(data);
 }
 
-function ouvirSala(){
-  if(salaListener) salaListener();
-  const ref=db.collection('salas').doc(salaId);
-  salaListener=ref.onSnapshot(async doc=>{
-    try{
-      const data=doc.data(); if(!data) return;
-      const lista=document.getElementById('lista'); const status=document.getElementById('status'); const modoSala=document.getElementById('modoSala'); lista.innerHTML='';
-      const players=data.players||{}; const prontos=data.prontos||{}; const entries=Object.entries(players); const total=entries.length; const limite=data.limiteJogadores||2;
-      entries.forEach(([id,j])=>{ const li=document.createElement('li'); li.textContent=`${j.nome} ${prontos[id]?'✅':'❌'}`; lista.appendChild(li); });
-      modoSala.textContent=`Modo da sala: ${data.modo||'1x1'} • Jogadores: ${total}/${limite}`;
-      const totalProntos=Object.values(prontos).filter(Boolean).length;
-      if(!data.gameStarted){
-        if(total<limite){ status.textContent=`Aguardando ${limite-total} jogador(es)...`; }
-        else if(totalProntos<limite){ status.textContent=`${totalProntos}/${limite} jogadores prontos`; }
-        else{ status.textContent='Todos prontos. Iniciando partida...'; }
-        await iniciarPartidaSeNecessario(data);
-      }
-      if(data.gameStarted){ document.getElementById('espera').style.display='none'; document.getElementById('jogo').style.display='block'; renderJogo(data); }
-    }catch(e){ mostrarErro(e.message||'Erro ao atualizar sala.'); }
-  }, e=>mostrarErro(e.message||'Erro ao ouvir a sala.'));
-}
+function ouvirSala(){ if(salaListener) salaListener(); const ref=db.collection('salas').doc(salaId); salaListener=ref.onSnapshot(async doc=>{ try{ const data=doc.data(); if(!data) return; const lista=document.getElementById('lista'), status=document.getElementById('status'), modoSala=document.getElementById('modoSala'); lista.innerHTML=''; const players=data.players||{}, prontos=data.prontos||{}, entries=Object.entries(players), total=entries.length, limite=data.limiteJogadores||2; entries.forEach(([id,j])=>{ const li=document.createElement('li'); li.textContent=`${j.nome} ${prontos[id]?'✅':'❌'}`; lista.appendChild(li); }); modoSala.textContent=`Modo da sala: ${data.modo||'1x1'} • Jogadores: ${total}/${limite}`; const totalProntos=Object.values(prontos).filter(Boolean).length; if(!data.gameStarted){ if(total<limite) status.textContent=`Aguardando ${limite-total} jogador(es)...`; else if(totalProntos<limite) status.textContent=`${totalProntos}/${limite} jogadores prontos`; else status.textContent='Todos prontos. Iniciando partida...'; await iniciarPartidaSeNecessario(data); } if(data.gameStarted){ document.getElementById('espera').style.display='none'; document.getElementById('jogo').style.display='block'; renderJogo(data); } }catch(e){ mostrarErro(e.message||'Erro ao atualizar sala.'); }}, e=>mostrarErro(e.message||'Erro ao ouvir a sala.')); }
 
-document.getElementById('btnEntrar').addEventListener('click',entrar);
-document.getElementById('btnPronto').addEventListener('click',ficarPronto);
-document.getElementById('btnTruco').addEventListener('click',pedirTruco);
-document.getElementById('btnAceitar').addEventListener('click',aceitarTruco);
-document.getElementById('btnCorrer').addEventListener('click',correrTruco);
-document.getElementById('btnJogarSelecionada').addEventListener('click',jogarCartaSelecionada);
-document.getElementById('btnEncobrir').addEventListener('click',encobrirCartaSelecionada);
+document.getElementById('btnEntrar').addEventListener('click',entrar); document.getElementById('btnPronto').addEventListener('click',ficarPronto); document.getElementById('btnTruco').addEventListener('click',pedirTruco); document.getElementById('btnAceitar').addEventListener('click',aceitarTruco); document.getElementById('btnCorrer').addEventListener('click',correrTruco); document.getElementById('btnJogarSelecionada').addEventListener('click',jogarCartaSelecionada); document.getElementById('btnEncobrir').addEventListener('click',encobrirCartaSelecionada); document.getElementById('btnMaoOnzeJogar').addEventListener('click',()=>resolverMaoDeOnze('jogar')); document.getElementById('btnMaoOnzeCorrer').addEventListener('click',()=>resolverMaoDeOnze('correr'));
 </script>
 </body>
 </html>
